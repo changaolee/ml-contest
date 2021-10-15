@@ -1,6 +1,7 @@
 from base.data_loader_base import DataLoaderBase
-from paddlenlp.datasets import MapDataset
 from utils.config_utils import get_config
+from utils.utils import dataset_split
+from bunch import Bunch
 import pandas as pd
 import os
 
@@ -14,34 +15,47 @@ class DataFountain529(DataLoaderBase):
     ref: https://www.datafountain.cn/competitions/529/datasets
     """
 
-    def __init__(self, config):
+    def __init__(self, config: Bunch, mode: str, shuffle: bool):
         super().__init__(config)
 
         def load_data_from_source(path):
             dataset = []
             df = pd.read_csv(path)
             for idx, line in df.iterrows():
-                sample = {"text": line["text"], "label": line["class"]}
+                text, label = line.get("text", ""), line.get("class", "")
+                sample = {"text": text, "label": label}
                 dataset.append(sample)
             return dataset
 
-        self.logger = self.config.logger
-        self.label_list = ['0', '1', '2']
-        self.dataset = load_data_from_source(
-            os.path.join(DATA_PATH, self.config.exp_name, self.config.train_filename)
+        train_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.train_filename)
+        test_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.test_filename)
+
+        self.train_dataset, self.dev_dataset = dataset_split(
+            dataset=load_data_from_source(train_data_path),
+            dev_prop=config.dev_prop,
+            shuffle=shuffle
         )
+        self.test_dataset = load_data_from_source(test_data_path)
+        self.mode = mode
 
     def __len__(self):
-        return len(self.dataset)
+        if self.mode == 'train':
+            return len(self.train_dataset)
+        elif self.mode == 'dev':
+            return len(self.dev_dataset)
+        return len(self.test_dataset)
 
     def __getitem__(self, idx):
-        return self.dataset[idx]
+        if self.mode == 'train':
+            return self.train_dataset[idx]
+        elif self.mode == 'dev':
+            return self.dev_dataset[idx]
+        return self.test_dataset[idx]
 
 
 if __name__ == "__main__":
-    df529 = DataFountain529(
-        get_config(os.path.join(CONFIG_PATH, "data_fountain_529.json"))
-    )
+    conf = get_config(os.path.join(CONFIG_PATH, "data_fountain_529.json"))
+    df529 = DataFountain529(conf, "train", True)
     print(len(df529))
     for i in range(5):
         print(df529[i])

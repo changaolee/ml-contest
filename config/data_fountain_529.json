@@ -2,5 +2,6 @@
   "exp_name": "data_fountain_529",
   "train_filename": "train.csv",
   "test_filename": "test.csv",
+  "dev_prop": 0.2,
   "max_len": 128
 }
