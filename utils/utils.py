@@ -1,5 +1,23 @@
 import os
 import shutil
+import logging
+
+
+def get_logger(log_dir, exp_name):
+    logging.basicConfig(
+        format='%(asctime)s.%(msecs)03d - %(name)s - %(levelname)s - %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        level=logging.INFO,
+        handlers=[
+            logging.FileHandler(
+                filename="{0}/{1}.log".format(log_dir, exp_name),
+                encoding='utf-8'
+            ),
+            logging.StreamHandler()
+        ]
+    )
+    logger = logging.getLogger(exp_name)
+    return logger
 
 
 def mkdir_if_not_exist(dir_name, is_delete=False):

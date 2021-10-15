@@ -1,5 +1,6 @@
 {
   "exp_name": "data_fountain_529",
   "train_filename": "train.csv",
-  "test_filename": "test.csv"
+  "test_filename": "test.csv",
+  "max_len": 128
 }

@@ -13,7 +13,7 @@ import paddlenlp
 train_ds, dev_ds, test_ds = paddlenlp.datasets.load_dataset(
     'chnsenticorp', splits=['train', 'dev', 'test'])
 
-print(train_ds)
-print(train_ds.label_list)
+# print(test_ds)
+print(test_ds.label_list)
 for i in range(10):
-    print(train_ds[i])
+    print(test_ds[i])
