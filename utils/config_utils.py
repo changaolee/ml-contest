@@ -16,9 +16,9 @@ def get_config(json_file):
         config_dict = json.load(config_file)
 
     config = Bunch(config_dict)
-    config.tb_dir = os.path.join(ROOT_PATH, "experiments", config.exp_name, "tensorboard")  # 训练可视化
-    config.cp_dir = os.path.join(ROOT_PATH, "experiments", config.exp_name, "checkpoints")  # 模型
-    config.log_dir = os.path.join(ROOT_PATH, "experiments", config.exp_name, "logs")  # 日志
+    config.tb_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "tensorboard")  # 训练可视化
+    config.cp_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "checkpoint")  # 模型
+    config.log_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "log")  # 日志
 
     config.logger = get_logger(config.log_dir, config.exp_name)
 

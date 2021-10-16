@@ -1,4 +1,4 @@
-from base.data_loader_base import DataLoaderBase
+from base.dataset_base import DatasetBase
 from utils.config_utils import get_config
 from utils.utils import dataset_split
 from bunch import Bunch
@@ -9,7 +9,7 @@ DATA_PATH = os.path.abspath(os.path.join(os.getcwd(), "../data"))
 CONFIG_PATH = os.path.abspath(os.path.join(os.getcwd(), "../config"))
 
 
-class DataFountain529(DataLoaderBase):
+class DataFountain529(DatasetBase):
     """
     情感分类（1：正面，0：负面，2：中立）
     ref: https://www.datafountain.cn/competitions/529/datasets

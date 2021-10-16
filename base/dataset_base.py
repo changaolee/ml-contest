@@ -1,7 +1,7 @@
 from bunch import Bunch
 
 
-class DataLoaderBase(object):
+class DatasetBase(object):
     """
     数据加载的基类
     """
