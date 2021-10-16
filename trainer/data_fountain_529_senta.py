@@ -16,6 +16,7 @@ class DataFountain529SentaTrainer(object):
         self.dev_data = dev_data
         self.config = config
         self.tokenizer = BertTokenizer.from_pretrained(self.config.pretrain_model)
+        self.logger = self.config.logger
 
     def train(self):
         # 转换至模型的输入
