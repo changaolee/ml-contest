@@ -3,5 +3,6 @@
   "train_filename": "train_data_public.csv",
   "test_filename": "test_public.csv",
   "dev_prop": 0.2,
-  "max_len": 128
+  "max_len": 128,
+  "pretrain_model": "bert-wwm-chinese"
 }

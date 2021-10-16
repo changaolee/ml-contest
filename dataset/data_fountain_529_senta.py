@@ -15,7 +15,7 @@ class DataFountain529Senta(DatasetBase):
     """
 
     def __init__(self, config: Bunch, mode: str, shuffle: bool):
-        super().__init__(config)
+        super().__init__(config, mode)
 
         def load_data_from_source(path):
             dataset = []
@@ -29,32 +29,31 @@ class DataFountain529Senta(DatasetBase):
         train_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.train_filename)
         test_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.test_filename)
 
-        self.train_dataset, self.dev_dataset = dataset_split(
-            dataset=load_data_from_source(train_data_path),
-            dev_prop=config.dev_prop,
-            shuffle=shuffle
-        )
-        self.test_dataset = load_data_from_source(test_data_path)
-        self.mode = mode
+        if self.mode == "train":
+            self.dataset, _ = dataset_split(
+                dataset=load_data_from_source(train_data_path),
+                dev_prop=config.dev_prop,
+                shuffle=shuffle
+            )
+        elif self.mode == "dev":
+            _, self.dataset = dataset_split(
+                dataset=load_data_from_source(train_data_path),
+                dev_prop=config.dev_prop,
+                shuffle=shuffle
+            )
+        else:
+            self.dataset = load_data_from_source(test_data_path)
 
     def __len__(self):
-        if self.mode == 'train':
-            return len(self.train_dataset)
-        elif self.mode == 'dev':
-            return len(self.dev_dataset)
-        return len(self.test_dataset)
+        return len(self.dataset)
 
     def __getitem__(self, idx):
-        if self.mode == 'train':
-            return self.train_dataset[idx]
-        elif self.mode == 'dev':
-            return self.dev_dataset[idx]
-        return self.test_dataset[idx]
+        return self.dataset[idx]
 
 
 if __name__ == "__main__":
     conf = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
-    df529 = DataFountain529Senta(conf, "train", True)
+    df529 = DataFountain529Senta(conf, "dev", True)
     print(len(df529))
     for i in range(5):
         print(df529[i])

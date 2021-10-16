@@ -1,5 +1,6 @@
 from base.model_base import ModelBase
 from bunch import Bunch
+from paddlenlp.transformers import BertForSequenceClassification, BertTokenizer
 
 
 class DataFountain529SentaModel(ModelBase):

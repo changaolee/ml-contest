@@ -1,13 +1,12 @@
-class DatasetBase(object):
+from paddle.io import Dataset
+
+
+class DatasetBase(Dataset):
     """
-    数据加载的基类
+    自定义数据集的基类
     """
 
-    def __init__(self, config):
+    def __init__(self, config, mode='train'):
+        super().__init__()
         self.config = config
-
-    def __len__(self):
-        raise NotImplementedError
-
-    def __getitem__(self, idx):
-        raise NotImplementedError
+        self.mode = mode
