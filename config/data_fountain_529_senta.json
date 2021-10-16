@@ -4,5 +4,9 @@
   "test_filename": "test_public.csv",
   "dev_prop": 0.2,
   "max_len": 128,
-  "pretrain_model": "bert-wwm-chinese"
+  "pretrain_model": "bert-wwm-chinese",
+  "baseline": {
+    "hidden_size": 768
+  },
+  "num_classes":3
 }

@@ -3,7 +3,7 @@ from paddle.io import Dataset
 
 class DatasetBase(Dataset):
     """
-    自定义数据集的基类
+    数据集基类
     """
 
     def __init__(self, config, mode='train'):
