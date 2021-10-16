@@ -9,12 +9,12 @@ DATA_PATH = os.path.abspath(os.path.join(os.getcwd(), "../data"))
 CONFIG_PATH = os.path.abspath(os.path.join(os.getcwd(), "../config"))
 
 
-class DataFountain529Senta(DatasetBase):
+class DataFountain529SentaDataset(DatasetBase):
     """
     df-529 情感分类数据集（1：正面，0：负面，2：中立）
     """
 
-    def __init__(self, config: Bunch, mode: str, shuffle: bool):
+    def __init__(self, config: Bunch, mode: str, shuffle: bool = False):
         super().__init__(config, mode)
 
         def load_data_from_source(path):
@@ -53,7 +53,7 @@ class DataFountain529Senta(DatasetBase):
 
 if __name__ == "__main__":
     conf = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
-    df529 = DataFountain529Senta(conf, "dev", True)
+    df529 = DataFountain529SentaDataset(conf, "dev", True)
     print(len(df529))
     for i in range(5):
         print(df529[i])
