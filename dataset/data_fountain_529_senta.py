@@ -11,8 +11,7 @@ CONFIG_PATH = os.path.abspath(os.path.join(os.getcwd(), "../config"))
 
 class DataFountain529Senta(DatasetBase):
     """
-    情感分类（1：正面，0：负面，2：中立）
-    ref: https://www.datafountain.cn/competitions/529/datasets
+    df-529 情感分类数据集（1：正面，0：负面，2：中立）
     """
 
     def __init__(self, config: Bunch, mode: str, shuffle: bool):
