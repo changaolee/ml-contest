@@ -1,4 +1,4 @@
-from base.dataset_base import DatasetBase
+from paddle.io import Dataset
 from utils.config_utils import get_config
 from utils.utils import dataset_split
 from bunch import Bunch
@@ -9,13 +9,17 @@ DATA_PATH = os.path.abspath(os.path.join(os.getcwd(), "../data"))
 CONFIG_PATH = os.path.abspath(os.path.join(os.getcwd(), "../config"))
 
 
-class DataFountain529SentaDataset(DatasetBase):
+class DataFountain529SentaDataset(Dataset):
     """
     df-529 情感分类数据集（1：正面，0：负面，2：中立）
     """
 
     def __init__(self, config: Bunch, mode: str, shuffle: bool = False):
-        super().__init__(config, mode)
+        super().__init__()
+
+        self.config = config
+        self.mode = mode
+        self.shuffle = shuffle
 
         def load_data_from_source(path):
             dataset = []
@@ -32,14 +36,14 @@ class DataFountain529SentaDataset(DatasetBase):
         if self.mode == "train":
             self.dataset, _ = dataset_split(
                 dataset=load_data_from_source(train_data_path),
-                dev_prop=config.dev_prop,
-                shuffle=shuffle
+                dev_prop=self.config.dev_prop,
+                shuffle=self.shuffle
             )
         elif self.mode == "dev":
             _, self.dataset = dataset_split(
                 dataset=load_data_from_source(train_data_path),
-                dev_prop=config.dev_prop,
-                shuffle=shuffle
+                dev_prop=self.config.dev_prop,
+                shuffle=self.shuffle
             )
         else:
             self.dataset = load_data_from_source(test_data_path)
