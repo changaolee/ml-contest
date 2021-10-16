@@ -20,10 +20,10 @@ def get_config(json_file):
     config.cp_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "checkpoint")  # 模型
     config.log_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "log")  # 日志
 
-    config.logger = get_logger(config.log_dir, config.exp_name)
-
     mkdir_if_not_exist(config.tb_dir)
     mkdir_if_not_exist(config.cp_dir)
     mkdir_if_not_exist(config.log_dir)
+
+    config.logger = get_logger(config.log_dir, config.exp_name)
 
     return config

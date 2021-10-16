@@ -9,7 +9,7 @@ DATA_PATH = os.path.abspath(os.path.join(os.getcwd(), "../data"))
 CONFIG_PATH = os.path.abspath(os.path.join(os.getcwd(), "../config"))
 
 
-class DataFountain529(DatasetBase):
+class DataFountain529Senta(DatasetBase):
     """
     情感分类（1：正面，0：负面，2：中立）
     ref: https://www.datafountain.cn/competitions/529/datasets
@@ -54,8 +54,8 @@ class DataFountain529(DatasetBase):
 
 
 if __name__ == "__main__":
-    conf = get_config(os.path.join(CONFIG_PATH, "data_fountain_529.json"))
-    df529 = DataFountain529(conf, "train", True)
+    conf = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
+    df529 = DataFountain529Senta(conf, "train", True)
     print(len(df529))
     for i in range(5):
         print(df529[i])

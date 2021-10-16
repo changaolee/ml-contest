@@ -1,5 +1,5 @@
 {
-  "exp_name": "data_fountain_529",
+  "exp_name": "data_fountain_529_senta",
   "train_filename": "train.csv",
   "test_filename": "test.csv",
   "dev_prop": 0.2,
