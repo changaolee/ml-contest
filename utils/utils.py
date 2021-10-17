@@ -18,10 +18,7 @@ def get_logger(log_dir: str, exp_name: str):
         datefmt='%Y-%m-%d %H:%M:%S',
         level=logging.INFO,
         handlers=[
-            logging.FileHandler(
-                filename="{0}/{1}.log".format(log_dir, exp_name),
-                encoding='utf-8'
-            ),
+            logging.FileHandler(filename="{0}/{1}.log".format(log_dir, exp_name), encoding='utf-8'),
             logging.StreamHandler()
         ]
     )

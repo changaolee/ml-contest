@@ -1,4 +1,4 @@
-from paddlenlp.transformers import BertTokenizer
+from paddlenlp.transformers import BertTokenizer, SkepTokenizer
 from paddlenlp.datasets import MapDataset
 from paddle.io import DataLoader, BatchSampler
 from paddle.optimizer import AdamW
@@ -15,16 +15,25 @@ class DataFountain529SentaTrainer(object):
         self.train_data = train_data
         self.dev_data = dev_data
         self.config = config
-        self.tokenizer = BertTokenizer.from_pretrained(self.config.pretrain_model)
         self.logger = self.config.logger
 
     def train(self):
+        # 加载预训练模型对应的 tokenizer
+        pretrained_model_name = self.config.pretrained_model_name
+        if pretrained_model_name in ["bert-wwm-chinese"]:
+            tokenizer = BertTokenizer.from_pretrained(pretrained_model_name)
+        elif pretrained_model_name in ["skep_ernie_1.0_large_ch"]:
+            tokenizer = SkepTokenizer.from_pretrained(pretrained_model_name)
+        else:
+            self.logger.error("load pretrain_model {} tokenizer error.".format(pretrained_model_name))
+            return False
+
         # 转换至模型的输入
         self.train_data = self.train_data.map(partial(
-            self._convert_sample, tokenizer=self.tokenizer, max_len=self.config.max_len
+            self._convert_sample, tokenizer=tokenizer, max_len=self.config.max_len
         ))
         self.dev_data = self.dev_data.map(partial(
-            self._convert_sample, tokenizer=self.tokenizer, max_len=self.config.max_len
+            self._convert_sample, tokenizer=tokenizer, max_len=self.config.max_len
         ))
 
         train_sampler = BatchSampler(dataset=self.train_data, batch_size=self.config.train_batch_size, shuffle=True)
@@ -38,7 +47,7 @@ class DataFountain529SentaTrainer(object):
 
         # 模型训练
         for input_ids, attention_mask, labels in train_data_loader():
-            logits = self.model(input_ids, attention_mask)
+            logits = self.model(input_ids, attention_mask=attention_mask)
             loss = criterion(logits, labels)
             probs = F.softmax(logits, axis=1)
             loss.backward()
