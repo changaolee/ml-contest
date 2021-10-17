@@ -1,7 +1,6 @@
 from bunch import Bunch
 from paddle import nn, unsqueeze
-from paddlenlp.transformers import BertPretrainedModel, SkepPretrainedModel, \
-    BertForSequenceClassification, SkepForSequenceClassification
+from paddlenlp.transformers import BertPretrainedModel, SkepPretrainedModel
 
 
 class DataFountain529SentaBertBaselineModel(BertPretrainedModel):
