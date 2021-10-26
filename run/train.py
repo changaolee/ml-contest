@@ -1,3 +1,4 @@
+from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from model.data_fountain_529_senta import DataFountain529SentaBertBaselineModel, DataFountain529SentaSkepBaselineModel
 from trainer.data_fountain_529_senta import DataFountain529SentaTrainer
@@ -11,6 +12,13 @@ CONFIG_PATH = os.path.abspath(os.path.join(os.getcwd(), "../config"))
 def train():
     config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
     logger = config.logger
+
+    # 原始数据预处理
+    data_processor = DataFountain529SentaDataProcessor(config)
+    data_processor.process()
+    config = data_processor.config
+
+    # TODO: continue
 
     # 获取训练集、验证集
     train_ds = MapDataset(DataFountain529SentaDataset(config, "train"))
