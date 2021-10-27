@@ -19,9 +19,15 @@ class DataFountain529SentaDataProcessor(object):
         # 处理后的数据集路径
         processed_path = os.path.join(self.DATA_PATH, self.config.exp_name, "processed")
         mkdir_if_not_exist(processed_path)
-        self.config.train_path = os.path.join(processed_path, "train.csv")
-        self.config.dev_path = os.path.join(processed_path, "dev.csv")
-        self.config.test_path = os.path.join(processed_path, "test.csv")
+        self.train_path = os.path.join(processed_path, "train.csv")
+        self.dev_path = os.path.join(processed_path, "dev.csv")
+        self.test_path = os.path.join(processed_path, "test.csv")
+
+        self.config.splits = {
+            "train": os.path.join(processed_path, "train.csv"),
+            "dev": os.path.join(processed_path, "dev.csv"),
+            "test": os.path.join(processed_path, "test.csv")
+        }
 
         # 开发集占比
         self.dev_prop = config.dev_prop
@@ -30,9 +36,9 @@ class DataFountain529SentaDataProcessor(object):
         assert 0 < self.dev_prop < 1, "开发集占比应在 0 到 1 之间"
 
         if not override and \
-                os.path.isfile(self.config.train_path) and \
-                os.path.isfile(self.config.dev_path) and \
-                os.path.isfile(self.config.test_path):
+                os.path.isfile(self.train_path) and \
+                os.path.isfile(self.dev_path) and \
+                os.path.isfile(self.test_path):
             return
 
         # 训练集、开发集划分
@@ -46,11 +52,11 @@ class DataFountain529SentaDataProcessor(object):
     def train_dev_dataset_split(self):
         df = pd.read_csv(self.train_data_path, encoding="utf-8")
 
-        with open(self.config.train_path, "w", encoding="utf-8") as train_f:
+        with open(self.train_path, "w", encoding="utf-8") as train_f:
             train_writer = csv.writer(train_f)
             train_writer.writerow(["text", "label"])
 
-            with open(self.config.dev_path, "w", encoding="utf-8") as dev_f:
+            with open(self.dev_path, "w", encoding="utf-8") as dev_f:
                 dev_writer = csv.writer(dev_f)
                 dev_writer.writerow(["text", "label"])
 
@@ -64,7 +70,7 @@ class DataFountain529SentaDataProcessor(object):
     def test_dataset_save(self):
         df = pd.read_csv(self.test_data_path, encoding="utf-8")
 
-        with open(self.config.test_path, "w", encoding="utf-8") as test_f:
+        with open(self.test_path, "w", encoding="utf-8") as test_f:
             test_writer = csv.writer(test_f)
             test_writer.writerow(["id", "text"])
 

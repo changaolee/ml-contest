@@ -18,11 +18,8 @@ def train():
     data_processor.process()
     config = data_processor.config
 
-    # TODO: continue
-
-    # 获取训练集、验证集
-    train_ds = MapDataset(DataFountain529SentaDataset(config, "train"))
-    dev_ds = MapDataset(DataFountain529SentaDataset(config, "dev"))
+    # 获取训练集、开发集
+    train_ds, dev_ds = DataFountain529SentaDataset(config).load_data(splits=['train', 'dev'], lazy=False)
 
     # 加载预训练模型
     pretrained_model_name = config.pretrained_model_name
@@ -38,7 +35,7 @@ def train():
         logger.error("load pretrain_model {} error.".format(pretrained_model_name))
         return False
 
-    # 获取训练器
+    # TODO: 获取训练器
     trainer = DataFountain529SentaTrainer(model, train_data=train_ds, dev_data=dev_ds, config=config)
     trainer.train()
 
