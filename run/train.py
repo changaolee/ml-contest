@@ -21,7 +21,7 @@ def train():
     # 获取训练集、开发集
     train_ds, dev_ds = DataFountain529SentaDataset(config).load_data(splits=['train', 'dev'], lazy=False)
 
-    # 加载预训练模型
+    # 加载模型
     pretrained_model_name = config.pretrained_model_name
     if pretrained_model_name in ["bert-wwm-chinese"]:
         model = DataFountain529SentaBertBaselineModel.from_pretrained(  # bert baseline
@@ -33,10 +33,12 @@ def train():
         )
     else:
         logger.error("load pretrain_model {} error.".format(pretrained_model_name))
-        return False
+        return
 
-    # TODO: 获取训练器
-    trainer = DataFountain529SentaTrainer(model, train_data=train_ds, dev_data=dev_ds, config=config)
+    # 获取训练器
+    trainer = DataFountain529SentaTrainer(model, train_ds=train_ds, dev_ds=dev_ds, config=config)
+
+    # 开始训练
     trainer.train()
 
 

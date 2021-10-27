@@ -50,7 +50,7 @@
   /**
    * 模型参数配置
    */
-  "max_len": 128,
+  "max_seq_len": 256,
   "hidden_dropout_prob": 0.1,
   "hidden_size": 768,
   "pretrained_model_name": "bert-wwm-chinese",

@@ -7,16 +7,15 @@ from paddle.metric import Accuracy
 from paddle import nn
 from bunch import Bunch
 from functools import partial
-import paddle.nn.functional as F
 import numpy as np
 import time
 
 
 class DataFountain529SentaTrainer(object):
-    def __init__(self, model: nn.Layer, train_data: MapDataset, dev_data: MapDataset, config: Bunch):
+    def __init__(self, model: nn.Layer, train_ds: MapDataset, dev_ds: MapDataset, config: Bunch):
         self.model = model
-        self.train_data = train_data
-        self.dev_data = dev_data
+        self.train_ds = train_ds
+        self.dev_ds = dev_ds
         self.config = config
         self.logger = self.config.logger
 
@@ -32,15 +31,16 @@ class DataFountain529SentaTrainer(object):
             return False
 
         # 转换至模型的输入
-        self.train_data = self.train_data.map(partial(
-            self._convert_sample, tokenizer=tokenizer, max_len=self.config.max_len
+        self.train_ds = self.train_ds.map(partial(
+            self.convert_example, tokenizer=tokenizer, max_seq_len=self.config.max_seq_len
         ))
-        self.dev_data = self.dev_data.map(partial(
-            self._convert_sample, tokenizer=tokenizer, max_len=self.config.max_len
+        self.dev_ds = self.dev_ds.map(partial(
+            self.convert_example, tokenizer=tokenizer, max_seq_len=self.config.max_seq_len
         ))
 
-        train_sampler = BatchSampler(dataset=self.train_data, batch_size=self.config.train_batch_size, shuffle=True)
-        train_data_loader = DataLoader(dataset=self.train_data, batch_sampler=train_sampler)
+        # 构建训练集合的 data_loader
+        train_batch_sampler = BatchSampler(dataset=self.train_ds, batch_size=self.config.train_batch_size, shuffle=True)
+        train_data_loader = DataLoader(dataset=self.train_ds, batch_sampler=train_batch_sampler, return_list=True)
 
         # 训练参数读取
         num_train_epochs = self.config.train_epochs
@@ -72,55 +72,28 @@ class DataFountain529SentaTrainer(object):
         tic_train = time.time()
         for epoch in range(1, num_train_epochs + 1):
             for step, batch in enumerate(train_data_loader, start=1):
-                input_ids, attention_mask, labels = batch
-                # 喂数据给 model
-                logits = self.model(input_ids, attention_mask=attention_mask)
-                # 计算损失函数值
-                loss = criterion(logits, labels)
-                # 预测分类概率值
-                probs = F.softmax(logits, axis=1)
-                # 计算acc
+
+                input_ids, token_type_ids, labels = batch
+                probs = self.model(input_ids=input_ids, token_type_ids=token_type_ids)
+                loss = criterion(probs, labels)
                 correct = metric.compute(probs, labels)
                 metric.update(correct)
                 acc = metric.accumulate()
 
                 global_step += 1
-                if global_step % 10 == 0:
-                    self.logger.info(
-                        "global step %d, epoch: %d, batch: %d, loss: %.5f, accu: %.5f, speed: %.2f step/s"
-                        % (global_step, epoch, step, loss, acc,
-                           10 / (time.time() - tic_train)))
-                    tic_train = time.time()
 
-                # 反向梯度回传，更新参数
+                # 每间隔 100 step 输出训练指标
+                if global_step % 100 == 0:
+                    print("global step %d, epoch: %d, batch: %d, loss: %.5f, accu: %.5f, speed: %.2f step/s"
+                          % (global_step, epoch, step, loss, acc, 10 / (time.time() - tic_train)))
+                    tic_train = time.time()
                 loss.backward()
                 optimizer.step()
+                lr_scheduler.step()
                 optimizer.clear_grad()
 
-                # if global_step % 100 == 0:
-                #     save_dir = os.path.join(ckpt_dir, "model_%d" % global_step)
-                #     if not os.path.exists(save_dir):
-                #         os.makedirs(save_dir)
-                #     # 评估当前训练的模型
-                #     evaluate(model, criterion, metric, dev_data_loader)
-                #     # 保存当前模型参数等
-                #     model.save_pretrained(save_dir)
-                #     # 保存tokenizer的词表等
-                #     tokenizer.save_pretrained(save_dir)
-
-        # # 模型训练
-        # for input_ids, attention_mask, labels in train_data_loader():
-        #     logits = self.model(input_ids, attention_mask=attention_mask)
-        #     loss = criterion(logits, labels)
-        #     probs = F.softmax(logits, axis=1)
-        #     loss.backward()
-        #     optimizer.step()
-        #     optimizer.clear_grad()
-
     @staticmethod
-    def _convert_sample(sample, tokenizer, max_len):
-        encoded_inputs = tokenizer(text=sample["text"], max_seq_len=max_len)
-        input_ids, attention_mask = encoded_inputs["input_ids"], [1] * len(encoded_inputs["input_ids"])
-        input_ids += [0] * max(max_len - len(input_ids), 0)
-        attention_mask += [0] * max(max_len - len(attention_mask), 0)
-        return tuple([np.array(x, dtype="int64") for x in [input_ids, attention_mask, [sample["label"]]]])
+    def convert_example(example, tokenizer, max_seq_len):
+        encoded_inputs = tokenizer(text=example["text"], max_seq_len=max_seq_len, pad_to_max_seq_len=True)
+        return tuple([np.array(x, dtype="int64") for x in [
+            encoded_inputs["input_ids"], encoded_inputs["token_type_ids"], [example["label"]]]])

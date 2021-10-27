@@ -15,8 +15,8 @@ class DataFountain529SentaBertBaselineModel(BertPretrainedModel):
         self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
         self.classifier = nn.layer.Linear(self.config.hidden_size, self.config.num_classes)
 
-    def forward(self, input_ids):
-        _, pooled_output = self.bert(input_ids)
+    def forward(self, input_ids, token_type_ids):
+        _, pooled_output = self.bert(input_ids, token_type_ids=token_type_ids)
         pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
         return logits
@@ -34,8 +34,8 @@ class DataFountain529SentaSkepBaselineModel(SkepPretrainedModel):
         self.dropout = nn.Dropout(self.config.hidden_dropout_prob)
         self.classifier = nn.layer.Linear(self.config.hidden_size, self.config.num_classes)
 
-    def forward(self, input_ids):
-        _, pooled_output = self.skep(input_ids)
+    def forward(self, input_ids, token_type_ids):
+        _, pooled_output = self.skep(input_ids, token_type_ids=token_type_ids)
         pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
         return logits
