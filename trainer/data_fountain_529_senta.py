@@ -9,6 +9,7 @@ from bunch import Bunch
 from functools import partial
 import numpy as np
 import time
+import paddle
 
 
 class DataFountain529SentaTrainer(object):
@@ -38,59 +39,81 @@ class DataFountain529SentaTrainer(object):
             self.convert_example, tokenizer=tokenizer, max_seq_len=self.config.max_seq_len
         ))
 
-        # 构建训练集合的 data_loader
-        train_batch_sampler = BatchSampler(dataset=self.train_ds, batch_size=self.config.train_batch_size, shuffle=True)
-        train_data_loader = DataLoader(dataset=self.train_ds, batch_sampler=train_batch_sampler, return_list=True)
+        model = paddle.Model(self.model)
 
-        # 训练参数读取
-        num_train_epochs = self.config.train_epochs
-        num_training_steps = len(train_data_loader) * num_train_epochs
+        # 为模型训练做准备，设置优化器，损失函数和精度计算方式
+        model.prepare(optimizer=paddle.optimizer.Adam(parameters=model.parameters()),
+                      loss=paddle.nn.CrossEntropyLoss(),
+                      metrics=paddle.metric.Accuracy())
 
-        # 定义 learning_rate_scheduler，负责在训练过程中对 lr 进行调度
-        lr_scheduler = LinearDecayWithWarmup(self.config.learning_rate, num_training_steps, 0.0)
+        # 启动模型训练，指定训练数据集，设置训练轮次，设置每次数据集计算的批次大小，设置日志格式
+        model.fit(self.train_ds,
+                  epochs=self.config.train_epochs,
+                  batch_size=self.config.train_batch_size,
+                  verbose=1)
 
-        # Generate parameter names needed to perform weight decay.
-        # All bias and LayerNorm parameters are excluded.
-        decay_params = [
-            p.name for n, p in self.model.named_parameters()
-            if not any(nd in n for nd in ["bias", "norm"])
-        ]
+        # 用 evaluate 在测试集上对模型进行验证
+        eval_result = model.evaluate(self.dev_ds, verbose=1)
 
-        # 定义 Optimizer
-        optimizer = AdamW(
-            learning_rate=lr_scheduler,
-            parameters=self.model.parameters(),
-            weight_decay=0.0,
-            apply_decay_param_fun=lambda x: x in decay_params)
-        # 交叉熵损失
-        criterion = nn.loss.CrossEntropyLoss()
-        # 评估的时候采用准确率指标
-        metric = Accuracy()
+        print(eval_result)
 
-        # 开启训练
-        global_step = 0
-        tic_train = time.time()
-        for epoch in range(1, num_train_epochs + 1):
-            for step, batch in enumerate(train_data_loader, start=1):
-
-                input_ids, token_type_ids, labels = batch
-                probs = self.model(input_ids=input_ids, token_type_ids=token_type_ids)
-                loss = criterion(probs, labels)
-                correct = metric.compute(probs, labels)
-                metric.update(correct)
-                acc = metric.accumulate()
-
-                global_step += 1
-
-                # 每间隔 100 step 输出训练指标
-                if global_step % 100 == 0:
-                    print("global step %d, epoch: %d, batch: %d, loss: %.5f, accu: %.5f, speed: %.2f step/s"
-                          % (global_step, epoch, step, loss, acc, 10 / (time.time() - tic_train)))
-                    tic_train = time.time()
-                loss.backward()
-                optimizer.step()
-                lr_scheduler.step()
-                optimizer.clear_grad()
+        # # 构建训练集合的 data_loader
+        # train_batch_sampler = BatchSampler(dataset=self.train_ds,
+        #                                    batch_size=self.config.train_batch_size,
+        #                                    shuffle=True)
+        # train_data_loader = DataLoader(dataset=self.train_ds,
+        #                                batch_sampler=train_batch_sampler,
+        #                                return_list=True)
+        #
+        # # 训练参数读取
+        # num_train_epochs = self.config.train_epochs
+        # num_training_steps = len(train_data_loader) * num_train_epochs
+        #
+        # # 定义 learning_rate_scheduler，负责在训练过程中对 lr 进行调度
+        # lr_scheduler = LinearDecayWithWarmup(self.config.learning_rate, num_training_steps, 0.0)
+        #
+        # # Generate parameter names needed to perform weight decay.
+        # # All bias and LayerNorm parameters are excluded.
+        # decay_params = [
+        #     p.name for n, p in self.model.named_parameters()
+        #     if not any(nd in n for nd in ["bias", "norm"])
+        # ]
+        #
+        # # 定义 Optimizer
+        # optimizer = AdamW(
+        #     learning_rate=lr_scheduler,
+        #     parameters=self.model.parameters(),
+        #     weight_decay=0.0,
+        #     apply_decay_param_fun=lambda x: x in decay_params)
+        # # 交叉熵损失
+        # criterion = nn.loss.CrossEntropyLoss()
+        # # 评估的时候采用准确率指标
+        # metric = Accuracy()
+        #
+        # # 开启训练
+        # global_step = 0
+        # tic_train = time.time()
+        # for epoch in range(1, num_train_epochs + 1):
+        #     for step, batch in enumerate(train_data_loader, start=1):
+        #
+        #         input_ids, token_type_ids, labels = batch
+        #         probs = self.model(input_ids=input_ids, token_type_ids=token_type_ids)
+        #         loss = criterion(probs, labels)
+        #         correct = metric.compute(probs, labels)
+        #         metric.update(correct)
+        #         acc = metric.accumulate()
+        #
+        #         global_step += 1
+        #
+        #         # 每间隔 100 step 输出训练指标
+        #         if global_step % 100 == 0:
+        #             print("global step %d, epoch: %d, batch: %d, loss: %.5f, accu: %.5f, speed: %.2f step/s"
+        #                   % (global_step, epoch, step, loss, acc, 10 / (time.time() - tic_train)))
+        #             tic_train = time.time()
+        #         loss.backward()
+        #         optimizer.step()
+        #         lr_scheduler.step()
+        #         optimizer.clear_grad()
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len):
