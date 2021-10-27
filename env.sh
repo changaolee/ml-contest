@@ -1,0 +1,2 @@
+ROOT_PATH="$(pwd)"
+export PYTHONPATH="${ROOT_PATH}:${PYTHONPATH}"

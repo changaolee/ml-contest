@@ -3,7 +3,10 @@ from utils.utils import mkdir_if_not_exist, get_logger
 import json
 import os
 
-ROOT_PATH = os.path.abspath(os.path.join(os.getcwd(), ".."))
+ROOT_PATH = os.path.abspath(os.path.join(os.path.realpath(__file__), "../.."))
+
+DATA_PATH = os.path.join(ROOT_PATH, "data")
+CONFIG_PATH = os.path.join(ROOT_PATH, "config")
 
 
 def get_config(json_file):

@@ -2,11 +2,8 @@ from data_process.data_fountain_529_senta import DataFountain529SentaDataProcess
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from model.data_fountain_529_senta import DataFountain529SentaBertBaselineModel, DataFountain529SentaSkepBaselineModel
 from trainer.data_fountain_529_senta import DataFountain529SentaTrainer
-from paddlenlp.datasets import MapDataset
-from utils.config_utils import get_config
+from utils.config_utils import get_config, CONFIG_PATH
 import os
-
-CONFIG_PATH = os.path.abspath(os.path.join(os.getcwd(), "../config"))
 
 
 def train():

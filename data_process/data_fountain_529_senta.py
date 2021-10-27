@@ -1,5 +1,6 @@
 from bunch import Bunch
 from utils.utils import mkdir_if_not_exist
+from utils.config_utils import DATA_PATH
 import pandas as pd
 import csv
 import random
@@ -7,17 +8,15 @@ import os
 
 
 class DataFountain529SentaDataProcessor(object):
-    DATA_PATH = os.path.abspath(os.path.join(os.getcwd(), "../data"))
-
     def __init__(self, config: Bunch):
         self.config = config
 
         # 原始数据集路径
-        self.train_data_path = os.path.join(self.DATA_PATH, self.config.exp_name, self.config.train_filename)
-        self.test_data_path = os.path.join(self.DATA_PATH, self.config.exp_name, self.config.test_filename)
+        self.train_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.train_filename)
+        self.test_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.test_filename)
 
         # 处理后的数据集路径
-        processed_path = os.path.join(self.DATA_PATH, self.config.exp_name, "processed")
+        processed_path = os.path.join(DATA_PATH, self.config.exp_name, "processed")
         mkdir_if_not_exist(processed_path)
         self.train_path = os.path.join(processed_path, "train.csv")
         self.dev_path = os.path.join(processed_path, "dev.csv")
