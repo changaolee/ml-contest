@@ -20,11 +20,11 @@ def get_config(json_file):
 
     config = Bunch(config_dict)
     config.tb_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "tensorboard")  # 训练可视化
-    config.cp_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "checkpoint")  # 模型
+    config.ckpt_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "checkpoint")  # 模型
     config.log_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "log")  # 日志
 
     mkdir_if_not_exist(config.tb_dir)
-    mkdir_if_not_exist(config.cp_dir)
+    mkdir_if_not_exist(config.ckpt_dir)
     mkdir_if_not_exist(config.log_dir)
 
     config.logger = get_logger(config.log_dir, config.exp_name)

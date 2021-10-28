@@ -1,7 +1,8 @@
 import os
 import shutil
 import logging
-import random
+import paddle
+import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -45,16 +46,39 @@ def mkdir_if_not_exist(dir_name: str, is_delete: bool = False):
         return False
 
 
-def dataset_split(dataset: list, dev_prop: float, shuffle: bool):
-    """
-    将原始数据集划分为测试集和验证集
-    :param dataset: 原始数据集
-    :param dev_prop: 验证集占比
-    :param shuffle: 是否打乱顺序
-    :return: 测试集和验证集
-    """
-    if shuffle:
-        random.shuffle(dataset)
-    idx = int(len(dataset) * dev_prop)
-    train_dataset, dev_dataset = dataset[idx:], dataset[:idx]
-    return train_dataset, dev_dataset
+def create_data_loader(dataset,
+                       trans_fn=None,
+                       mode='train',
+                       batch_size=1,
+                       batchify_fn=None):
+    if trans_fn:
+        dataset = dataset.map(trans_fn)
+
+    shuffle = True if mode == 'train' else False
+    if mode == "train":
+        sampler = paddle.io.DistributedBatchSampler(
+            dataset=dataset, batch_size=batch_size, shuffle=shuffle)
+    else:
+        sampler = paddle.io.BatchSampler(
+            dataset=dataset, batch_size=batch_size, shuffle=shuffle)
+    data_loader = paddle.io.DataLoader(
+        dataset, batch_sampler=sampler, collate_fn=batchify_fn)
+    return data_loader
+
+
+@paddle.no_grad()
+def evaluate(model, criterion, metric, data_loader):
+    model.eval()
+    metric.reset()
+    losses, accu = [], 0.0
+    for batch in data_loader:
+        input_ids, token_type_ids, labels = batch
+        logits = model(input_ids, token_type_ids)
+        loss = criterion(logits, labels)
+        losses.append(loss.numpy())
+        correct = metric.compute(logits, labels)
+        metric.update(correct)
+        accu = metric.accumulate()
+    logger.info("eval loss: {:.5f}, accu: {:.5f}".format(np.mean(losses), accu))
+    model.train()
+    metric.reset()
