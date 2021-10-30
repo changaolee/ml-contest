@@ -2,7 +2,7 @@ import logging
 
 from paddlenlp.transformers import PretrainedTokenizer
 from paddlenlp.datasets import MapDataset
-from paddlenlp.data import Tuple, Pad
+from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
 from bunch import Bunch
 from functools import partial
@@ -40,6 +40,7 @@ class DataFountain529SentaInfer(object):
         batchify_fn = lambda samples, fn=Tuple(
             Pad(axis=0, pad_val=self.tokenizer.pad_token_id),  # input_ids
             Pad(axis=0, pad_val=self.tokenizer.pad_token_type_id),  # token_type_ids
+            Stack()  # qid
         ): [data for data in fn(samples)]
 
         self.test_data_loader = create_data_loader(
