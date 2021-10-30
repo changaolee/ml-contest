@@ -70,7 +70,7 @@ class DataFountain529SentaTrainer(object):
         # 训练轮次
         self.epochs = self.config.train_epochs
         # 训练过程中保存模型参数的文件夹
-        self.ckpt_dir = self.config.ckpt_dir
+        self.ckpt_dir = os.path.join(self.config.ckpt_dir, self.config.model_name)
         # 训练所需要的总 step 数
         self.num_training_steps = len(self.train_data_loader) * self.epochs
         # Adam 优化器
