@@ -24,5 +24,5 @@ class DataFountain529SentaDataset(object):
     def read(data_path):
         df = pd.read_csv(data_path, encoding="utf-8")
         for idx, line in df.iterrows():
-            text, label = line.get("text", ""), line.get("label", "")
-            yield {"text": text, "label": label}
+            text, label, qid = line.get("text", ""), line.get("label", ""), line.get("id", "")
+            yield {"text": text, "label": label, "qid": qid}

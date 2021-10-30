@@ -74,7 +74,7 @@
    /**
    * 训练参数配置
    */
-  "train_batch_size": 64,
+  "batch_size": 64,
   "train_epochs":3,
   "learning_rate": 2e-5
 }

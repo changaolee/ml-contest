@@ -56,13 +56,13 @@ class DataFountain529SentaTrainer(object):
         self.train_data_loader = create_data_loader(
             self.train_ds,
             mode='train',
-            batch_size=self.config.train_batch_size,
+            batch_size=self.config.batch_size,
             batchify_fn=batchify_fn,
             trans_fn=trans_func)
         self.dev_data_loader = create_data_loader(
             self.dev_ds,
             mode='dev',
-            batch_size=self.config.train_batch_size,
+            batch_size=self.config.batch_size,
             batchify_fn=batchify_fn,
             trans_fn=trans_func)
 
