@@ -15,7 +15,7 @@ import csv
 
 
 class DataFountain529SentaInfer(object):
-    label_map = {0: "0", 1: "1"}
+    label_map = {0: "0", 1: "1", 2: "2"}
 
     def __init__(self,
                  model: nn.Layer,
