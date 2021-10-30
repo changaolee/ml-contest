@@ -1,7 +1,7 @@
-from paddlenlp.transformers import BertTokenizer, SkepTokenizer
+from paddlenlp.transformers import BertTokenizer
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
-from model.data_fountain_529_senta import DataFountain529SentaBertBaselineModel, DataFountain529SentaSkepBaselineModel
+from model.data_fountain_529_senta import DataFountain529SentaBertBaselineModel
 from trainer.data_fountain_529_senta import DataFountain529SentaTrainer
 from utils.config_utils import get_config, CONFIG_PATH
 from bunch import Bunch
@@ -35,9 +35,6 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     if model_name == "bert_baseline":
         model = DataFountain529SentaBertBaselineModel.from_pretrained("bert-wwm-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-wwm-chinese")
-    elif model_name == "skep_baseline":
-        model = DataFountain529SentaSkepBaselineModel.from_pretrained("skep_ernie_1.0_large_ch", config=config)
-        tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
     else:
         logger.error("load model error.".format(model_name))
     return model, tokenizer
