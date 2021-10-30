@@ -6,7 +6,7 @@ from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
 from bunch import Bunch
 from functools import partial
-from utils.utils import create_data_loader
+from utils.utils import create_data_loader, mkdir_if_not_exist
 import paddle.nn.functional as F
 import numpy as np
 import paddle
@@ -77,6 +77,7 @@ class DataFountain529SentaInfer(object):
 
     def save_result(self, result):
         res_dir = os.path.join(self.config.res_dir, self.config.model_name, "result.csv")
+        mkdir_if_not_exist(res_dir)
         # 写入预测结果
         with open(res_dir, "w", encoding="utf-8") as f:
             writer = csv.writer(f)
