@@ -76,7 +76,7 @@ class DataFountain529SentaInfer(object):
         self.save_result(result)
 
     def save_result(self, result):
-        res_dir = os.path.join(self.config.res_dir, self.config.model_name)
+        res_dir = os.path.join(self.config.res_dir, self.config.model_name, "result.csv")
         # 写入预测结果
         with open(res_dir, "w", encoding="utf-8") as f:
             writer = csv.writer(f)
