@@ -57,6 +57,8 @@
 // 情感分类任务：config/data_fountain_529_senta.json
 {
   "exp_name": "data_fountain_529_senta",  // 任务名称
+  "model_name": "bert_baseline",  // 模型名称
+  
   "train_filename": "train_data_public.csv",  // 原始训练集文件名
   "test_filename": "test_public.csv",  // 原始测试集文件名
   "dev_prop": 0.2,  // 开发集划分比例
@@ -67,8 +69,7 @@
   "max_seq_len": 256,
   "hidden_dropout_prob": 0.1,
   "hidden_size": 768,
-  "pretrained_model_name": "bert-wwm-chinese",
-  "num_classes": 3
+  "num_classes": 3,
   
    /**
    * 训练参数配置

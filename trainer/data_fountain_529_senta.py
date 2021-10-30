@@ -4,7 +4,7 @@ from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
 from bunch import Bunch
 from functools import partial
-from utils.utils import create_data_loader, evaluate
+from utils.utils import create_data_loader, evaluate, mkdir_if_not_exist
 import paddle.nn.functional as F
 import numpy as np
 import time
@@ -115,13 +115,12 @@ class DataFountain529SentaTrainer(object):
 
                 if global_step % 100 == 0:
                     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
-                    if not os.path.exists(save_dir):
-                        os.makedirs(save_dir)
+                    mkdir_if_not_exist(save_dir)
                     # 评估当前训练的模型
                     evaluate(self.model, self.criterion, self.metric, self.dev_data_loader)
                     # 保存当前模型参数等
-                    paddle.save(self.model.state_dict(), "{}.pdparams".format(self.config.exp_name))
-                    paddle.save(self.optimizer.state_dict(), "{}.optparams".format(self.config.exp_name))
+                    paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
+                    paddle.save(self.optimizer.state_dict(), os.path.join(save_dir, "opt.optparams"))
                     # 保存 tokenizer 的词表等
                     self.tokenizer.save_pretrained(save_dir)
 
