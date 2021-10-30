@@ -82,7 +82,8 @@ class DataFountain529SentaInfer(object):
             writer = csv.writer(f)
             writer.writerow(["id", "class"])
             for line in result:
-                writer.writerow(line)
+                qid, label = line
+                writer.writerow([qid[0], label])
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len=512):
