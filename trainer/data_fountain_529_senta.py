@@ -34,8 +34,10 @@ class DataFountain529SentaTrainer(object):
         self.dev_ds = dev_ds
         self.config = config
         self.logger = self.config.logger
+        self._gen_data_loader()
+        self._prepare()
 
-    def gen_data_loader(self):
+    def _gen_data_loader(self):
         # 将数据处理成模型可读入的数据格式
         trans_func = partial(
             self.convert_example,
@@ -64,7 +66,7 @@ class DataFountain529SentaTrainer(object):
             batchify_fn=batchify_fn,
             trans_fn=trans_func)
 
-    def prepare(self):
+    def _prepare(self):
         # 训练轮次
         self.epochs = self.config.train_epochs
         # 训练过程中保存模型参数的文件夹
@@ -81,9 +83,6 @@ class DataFountain529SentaTrainer(object):
         self.metric = paddle.metric.Accuracy()
 
     def train(self):
-        self.gen_data_loader()
-        self.prepare()
-
         # 开启训练
         global_step = 0
         tic_train = time.time()
@@ -121,7 +120,8 @@ class DataFountain529SentaTrainer(object):
                     # 评估当前训练的模型
                     evaluate(self.model, self.criterion, self.metric, self.dev_data_loader)
                     # 保存当前模型参数等
-                    self.model.save_pretrained(save_dir)
+                    paddle.save(self.model.state_dict(), "{}.pdparams".format(self.config.exp_name))
+                    paddle.save(self.optimizer.state_dict(), "{}.optparams".format(self.config.exp_name))
                     # 保存 tokenizer 的词表等
                     self.tokenizer.save_pretrained(save_dir)
 
