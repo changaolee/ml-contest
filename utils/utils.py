@@ -2,7 +2,6 @@ import os
 import shutil
 import logging
 import paddle
-import numpy as np
 
 logger = logging.getLogger(__name__)
 
@@ -64,21 +63,3 @@ def create_data_loader(dataset,
     data_loader = paddle.io.DataLoader(
         dataset, batch_sampler=sampler, collate_fn=batchify_fn)
     return data_loader
-
-
-@paddle.no_grad()
-def evaluate(model, criterion, metric, data_loader):
-    model.eval()
-    metric.reset()
-    losses, accu = [], 0.0
-    for batch in data_loader:
-        input_ids, token_type_ids, labels = batch
-        logits = model(input_ids, token_type_ids)
-        loss = criterion(logits, labels)
-        losses.append(loss.numpy())
-        correct = metric.compute(logits, labels)
-        metric.update(correct)
-        accu = metric.accumulate()
-    logger.info("eval loss: {:.5f}, accu: {:.5f}".format(np.mean(losses), accu))
-    model.train()
-    metric.reset()

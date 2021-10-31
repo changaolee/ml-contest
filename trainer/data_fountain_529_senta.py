@@ -4,7 +4,7 @@ from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
 from bunch import Bunch
 from functools import partial
-from utils.utils import create_data_loader, evaluate, mkdir_if_not_exist
+from utils.utils import create_data_loader, mkdir_if_not_exist
 import paddle.nn.functional as F
 import numpy as np
 import time
@@ -130,7 +130,7 @@ class DataFountain529SentaTrainer(object):
                     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
                     mkdir_if_not_exist(save_dir)
                     # 评估当前训练的模型
-                    evaluate(self.model, self.criterion, self.metric, self.dev_data_loader)
+                    self.evaluate()
                     # 保存当前模型参数等
                     paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
                     paddle.save(self.optimizer.state_dict(), os.path.join(save_dir, "opt.optparams"))
@@ -142,3 +142,20 @@ class DataFountain529SentaTrainer(object):
         encoded_inputs = tokenizer(text=example["text"], max_seq_len=max_seq_len, pad_to_max_seq_len=True)
         return tuple([np.array(x, dtype="int64") for x in [
             encoded_inputs["input_ids"], encoded_inputs["token_type_ids"], [example["label"]]]])
+
+    @paddle.no_grad()
+    def evaluate(self):
+        self.model.eval()
+        self.metric.reset()
+        losses, accu = [], 0.0
+        for batch in self.dev_data_loader:
+            input_ids, token_type_ids, labels = batch
+            logits = self.model(input_ids, token_type_ids)
+            loss = self.criterion(logits, labels)
+            losses.append(loss.numpy())
+            correct = self.metric.compute(logits, labels)
+            self.metric.update(correct)
+            accu = self.metric.accumulate()
+        self.logger.info("eval loss: {:.5f}, accu: {:.5f}".format(np.mean(losses), accu))
+        self.model.train()
+        self.metric.reset()
