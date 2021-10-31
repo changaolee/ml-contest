@@ -148,15 +148,16 @@ class DataFountain529SentaTrainer(object):
     def evaluate(self):
         self.model.eval()
         self.metric.reset()
-        losses, accu = [], 0.0
+        losses, kappa = [], 0.0
         for batch in self.dev_data_loader:
             input_ids, token_type_ids, labels = batch
             logits = self.model(input_ids, token_type_ids)
             loss = self.criterion(logits, labels)
             losses.append(loss.numpy())
-            correct = self.metric.compute(logits, labels)
-            self.metric.update(correct)
-            accu = self.metric.accumulate()
-        self.logger.info("eval loss: {:.5f}, accu: {:.5f}".format(np.mean(losses), accu))
+            probs = F.softmax(logits, axis=1)
+            preds = paddle.argmax(probs, axis=1, keepdim=True)
+            self.metric.update(preds, labels)
+            kappa = self.metric.accumulate()
+        self.logger.info("eval loss: {:.5f}, kappa: {:.5f}".format(np.mean(losses), kappa))
         self.model.train()
         self.metric.reset()
