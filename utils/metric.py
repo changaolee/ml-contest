@@ -43,8 +43,8 @@ class Kappa(Metric):
         preds = np.rint(preds).astype("int32")
 
         for i in range(sample_num):
-            pred = preds[i]
-            label = labels[i]
+            pred = preds[i][0]
+            label = labels[i][0]
             if pred == label:
                 self.pred_each_n[label] += 1
             self.label_each_n[label] += 1
@@ -58,9 +58,8 @@ class Kappa(Metric):
             A scaler float: results of the calculated kappa.
         """
         po = float(np.sum(self.pred_each_n)) / self.n if self.n != 0 else .0
-        pe = float(np.sum([
-            self.pred_each_n[i] * self.label_each_n[i] for i in range(self.num_classes)])
-        ) / (self.n * self.n) if self.n != 0 else .0
+        pe = float(np.sum([self.pred_each_n[i] * self.label_each_n[i]
+                           for i in range(self.num_classes)])) / (self.n * self.n) if self.n != 0 else .0
 
         return (po - pe) / (1 - pe)
 
