@@ -1,4 +1,4 @@
-from paddlenlp.transformers import PretrainedTokenizer
+from paddlenlp.transformers import PretrainedTokenizer, LinearDecayWithWarmup
 from paddlenlp.datasets import MapDataset
 from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
@@ -73,13 +73,26 @@ class DataFountain529SentaTrainer(object):
         self.ckpt_dir = os.path.join(self.config.ckpt_dir, self.config.model_name)
         # 训练所需要的总 step 数
         self.num_training_steps = len(self.train_data_loader) * self.epochs
-        # Adam 优化器
+
+        # 定义 learning_rate_scheduler，负责在训练过程中对 lr 进行调度
+        lr_scheduler = LinearDecayWithWarmup(self.config.learning_rate, self.num_training_steps, 0.0)
+
+        # Generate parameter names needed to perform weight decay.
+        # All bias and LayerNorm parameters are excluded.
+        decay_params = [
+            p.name for n, p in self.model.named_parameters()
+            if not any(nd in n for nd in ["bias", "norm"])
+        ]
+        # 定义 Optimizer
         self.optimizer = paddle.optimizer.AdamW(
-            learning_rate=self.config.learning_rate,
-            parameters=self.model.parameters())
+            learning_rate=lr_scheduler,
+            parameters=self.model.parameters(),
+            weight_decay=0.0,
+            apply_decay_param_fun=lambda x: x in decay_params)
+
         # 交叉熵损失函数
         self.criterion = paddle.nn.loss.CrossEntropyLoss()
-        # accuracy评价指标
+        # accuracy 评价指标
         self.metric = paddle.metric.Accuracy()
 
     def train(self):
