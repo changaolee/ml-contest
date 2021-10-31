@@ -5,6 +5,7 @@ from paddle import nn
 from bunch import Bunch
 from functools import partial
 from utils.utils import create_data_loader, mkdir_if_not_exist
+from utils.metric import Kappa
 import paddle.nn.functional as F
 import numpy as np
 import time
@@ -92,8 +93,8 @@ class DataFountain529SentaTrainer(object):
 
         # 交叉熵损失函数
         self.criterion = paddle.nn.loss.CrossEntropyLoss()
-        # accuracy 评价指标
-        self.metric = paddle.metric.Accuracy()
+        # kappa 评价指标
+        self.metric = Kappa()
 
     def train(self):
         # 开启训练
