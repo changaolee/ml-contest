@@ -94,7 +94,7 @@ class DataFountain529SentaTrainer(object):
         # 交叉熵损失函数
         self.criterion = paddle.nn.loss.CrossEntropyLoss()
         # kappa 评价指标
-        self.metric = Kappa()
+        self.metric = Kappa(self.config.num_classes)
 
     def train(self):
         # 开启训练
@@ -109,16 +109,16 @@ class DataFountain529SentaTrainer(object):
                 loss = self.criterion(logits, labels)
                 # 预测分类概率值
                 probs = F.softmax(logits, axis=1)
-                # 计算 acc
-                correct = self.metric.compute(probs, labels)
-                self.metric.update(correct)
-                acc = self.metric.accumulate()
+                # 计算 kappa
+                preds = paddle.argmax(probs, axis=1, keepdim=True)
+                self.metric.update(preds, labels)
+                kappa = self.metric.accumulate()
 
                 global_step += 1
                 if global_step % 10 == 0:
                     self.logger.info(
-                        "global step %d, epoch: %d, batch: %d, loss: %.5f, accu: %.5f, speed: %.2f step/s"
-                        % (global_step, epoch, step, loss, acc,
+                        "global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, speed: %.2f step/s"
+                        % (global_step, epoch, step, loss, kappa,
                            10 / (time.time() - tic_train)))
                     tic_train = time.time()
 
