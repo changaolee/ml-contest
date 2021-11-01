@@ -162,8 +162,7 @@ class DataFountain529SentaTrainer(object):
             preds = paddle.argmax(probs, axis=1, keepdim=True)
             self.metric.update(preds, labels)
             kappa = self.metric.accumulate()
-        self.logger.info("「%d/%d」eval loss: {:.5f}, kappa: {:.5f}".format(
-            self.fold, self.total_fold, np.mean(losses), kappa)
-        )
+        self.logger.info("「%d/%d」eval loss: %.5f, kappa: %.5f"
+                         % (self.fold, self.total_fold, float(np.mean(losses)), kappa))
         self.model.train()
         self.metric.reset()
