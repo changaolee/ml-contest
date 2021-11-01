@@ -61,7 +61,7 @@
   
   "train_filename": "train_data_public.csv",  // 原始训练集文件名
   "test_filename": "test_public.csv",  // 原始测试集文件名
-  "dev_prop": 0.2,  // 开发集划分比例
+  "k_fold": 5,  // 交叉验证折数
   
   /**
    * 模型参数配置

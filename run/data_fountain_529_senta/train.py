@@ -16,17 +16,24 @@ def train():
     data_processor.process()
     config = data_processor.config
 
-    # 获取训练集、开发集
-    train_ds, dev_ds = DataFountain529SentaDataset(config).load_data(splits=['train', 'dev'], lazy=False)
+    for fold in range(1, config.k_fold + 1):
+        config.fold = fold
 
-    # 加载 model 和 tokenizer
-    model, tokenizer = get_model_and_tokenizer(config.model_name, config)
+        # 获取训练集、开发集
+        train_ds, dev_ds = DataFountain529SentaDataset(config).load_data(
+            fold=config.fold, splits=['train', 'dev'], lazy=False
+        )
 
-    # 获取训练器
-    trainer = DataFountain529SentaTrainer(model, tokenizer=tokenizer, train_ds=train_ds, dev_ds=dev_ds, config=config)
+        # 加载 model 和 tokenizer
+        model, tokenizer = get_model_and_tokenizer(config.model_name, config)
 
-    # 开始训练
-    trainer.train()
+        # 获取训练器
+        trainer = DataFountain529SentaTrainer(
+            model=model, tokenizer=tokenizer, train_ds=train_ds, dev_ds=dev_ds, config=config
+        )
+
+        # 开始训练
+        trainer.train()
 
 
 def get_model_and_tokenizer(model_name: str, config: Bunch):

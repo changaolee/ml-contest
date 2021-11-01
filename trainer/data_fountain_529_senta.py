@@ -68,10 +68,14 @@ class DataFountain529SentaTrainer(object):
             trans_fn=trans_func)
 
     def _prepare(self):
+        # 当前训练折次
+        self.fold = self.config.fold
+        # 训练折数
+        self.total_fold = self.config.k_fold
         # 训练轮次
         self.epochs = self.config.train_epochs
         # 训练过程中保存模型参数的文件夹
-        self.ckpt_dir = os.path.join(self.config.ckpt_dir, self.config.model_name)
+        self.ckpt_dir = os.path.join(self.config.ckpt_dir, self.config.model_name, self.fold)
         # 训练所需要的总 step 数
         self.num_training_steps = len(self.train_data_loader) * self.epochs
 
@@ -117,8 +121,8 @@ class DataFountain529SentaTrainer(object):
                 global_step += 1
                 if global_step % 10 == 0:
                     self.logger.info(
-                        "global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, speed: %.2f step/s"
-                        % (global_step, epoch, step, loss, kappa,
+                        "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, speed: %.2f step/s"
+                        % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa,
                            10 / (time.time() - tic_train)))
                     tic_train = time.time()
 
@@ -158,6 +162,8 @@ class DataFountain529SentaTrainer(object):
             preds = paddle.argmax(probs, axis=1, keepdim=True)
             self.metric.update(preds, labels)
             kappa = self.metric.accumulate()
-        self.logger.info("eval loss: {:.5f}, kappa: {:.5f}".format(np.mean(losses), kappa))
+        self.logger.info("「%d/%d」eval loss: {:.5f}, kappa: {:.5f}".format(
+            self.fold, self.total_fold, np.mean(losses), kappa)
+        )
         self.model.train()
         self.metric.reset()

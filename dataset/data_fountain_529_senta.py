@@ -12,10 +12,10 @@ class DataFountain529SentaDataset(object):
         super().__init__()
         self.config = config
 
-    def load_data(self, splits=None, lazy=None):
+    def load_data(self, fold=1, splits=None, lazy=None):
         result = []
         for split in splits:
-            path = self.config.splits.get(split)
+            path = self.config.splits.get(split).format(fold)
             ds = load_dataset(self.read, data_path=path, lazy=lazy)
             result.append(ds)
         return result
