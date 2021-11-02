@@ -4,6 +4,7 @@ from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
 from bunch import Bunch
 from functools import partial
+from visualdl import LogWriter
 from utils.utils import create_data_loader, mkdir_if_not_exist
 from utils.metric import Kappa
 import paddle.nn.functional as F
@@ -74,8 +75,15 @@ class DataFountain529SentaTrainer(object):
         self.total_fold = self.config.k_fold
         # 训练轮次
         self.epochs = self.config.train_epochs
+
         # 训练过程中保存模型参数的文件夹
         self.ckpt_dir = os.path.join(self.config.ckpt_dir, self.config.model_name, "fold_{}".format(self.fold))
+        mkdir_if_not_exist(self.ckpt_dir)
+
+        # 可视化日志的文件夹
+        self.vis_dir = os.path.join(self.config.vis_dir, self.config.model_name, "fold_{}".format(self.fold))
+        mkdir_if_not_exist(self.vis_dir)
+
         # 训练所需要的总 step 数
         self.num_training_steps = len(self.train_data_loader) * self.epochs
 
@@ -126,6 +134,10 @@ class DataFountain529SentaTrainer(object):
                            10 / (time.time() - tic_train)))
                     tic_train = time.time()
 
+                    with LogWriter(logdir=self.vis_dir) as writer:
+                        writer.add_scalar(tag="kappa_train", step=global_step, value=kappa)
+                        writer.add_scalar(tag="loss_train", step=global_step, value=loss)
+
                 # 反向梯度回传，更新参数
                 loss.backward()
                 self.optimizer.step()
@@ -135,7 +147,7 @@ class DataFountain529SentaTrainer(object):
                     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
                     mkdir_if_not_exist(save_dir)
                     # 评估当前训练的模型
-                    self.evaluate()
+                    self.evaluate(global_step=global_step)
                     # 保存当前模型参数等
                     paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
                     paddle.save(self.optimizer.state_dict(), os.path.join(save_dir, "opt.optparams"))
@@ -149,7 +161,7 @@ class DataFountain529SentaTrainer(object):
             encoded_inputs["input_ids"], encoded_inputs["token_type_ids"], [example["label"]]]])
 
     @paddle.no_grad()
-    def evaluate(self):
+    def evaluate(self, global_step):
         self.model.eval()
         self.metric.reset()
         losses, kappa = [], 0.0
@@ -166,3 +178,7 @@ class DataFountain529SentaTrainer(object):
                          % (self.fold, self.total_fold, float(np.mean(losses)), kappa))
         self.model.train()
         self.metric.reset()
+
+        with LogWriter(logdir=self.vis_dir) as writer:
+            writer.add_scalar(tag="kappa_dev", step=global_step, value=kappa)
+            writer.add_scalar(tag="loss_dev", step=global_step, value=float(np.mean(losses)))

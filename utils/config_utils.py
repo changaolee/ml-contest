@@ -21,10 +21,12 @@ def get_config(json_file):
     config = Bunch(config_dict)
     config.ckpt_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "checkpoint")  # 模型
     config.log_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "log")  # 日志
+    config.vis_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "visual_log")  # 可视化
     config.res_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "result")  # 结果
 
     mkdir_if_not_exist(config.ckpt_dir)
     mkdir_if_not_exist(config.log_dir)
+    mkdir_if_not_exist(config.vis_dir)
     mkdir_if_not_exist(config.res_dir)
 
     config.logger = get_logger(config.log_dir, config.exp_name)
