@@ -13,7 +13,7 @@
   "hidden_size": 768,
   "num_classes": 3,
 
-  "batch_size": 32,
-  "train_epochs": 5,
+  "batch_size": 64,
+  "train_epochs": 10,
   "learning_rate": 1e-5
 }

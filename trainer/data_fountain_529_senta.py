@@ -7,6 +7,7 @@ from functools import partial
 from visualdl import LogWriter
 from utils.utils import create_data_loader, mkdir_if_not_exist
 from utils.metric import Kappa
+from utils.loss import FocalLoss
 import paddle.nn.functional as F
 import numpy as np
 import time
@@ -104,7 +105,7 @@ class DataFountain529SentaTrainer(object):
             apply_decay_param_fun=lambda x: x in decay_params)
 
         # 交叉熵损失函数
-        self.criterion = paddle.nn.loss.CrossEntropyLoss()
+        self.criterion = FocalLoss(weight=[0.106, 0.038, 0.856])
         # kappa 评价指标
         self.metric = Kappa(self.config.num_classes)
 
