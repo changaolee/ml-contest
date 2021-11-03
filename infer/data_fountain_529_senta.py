@@ -1,17 +1,14 @@
-import logging
-
 from paddlenlp.transformers import PretrainedTokenizer
 from paddlenlp.datasets import MapDataset
 from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
 from bunch import Bunch
 from functools import partial
-from utils.utils import create_data_loader, mkdir_if_not_exist
+from utils.utils import create_data_loader
 import paddle.nn.functional as F
 import numpy as np
 import paddle
 import os
-import csv
 
 
 class DataFountain529SentaInfer(object):
@@ -68,23 +65,11 @@ class DataFountain529SentaInfer(object):
             logits = self.model(input_ids, token_type_ids)
             # 预测分类
             probs = F.softmax(logits, axis=-1)
-            idx = paddle.argmax(probs, axis=1).numpy()
-            idx = idx.tolist()
+            idx = paddle.argmax(probs, axis=1).numpy().tolist()
             labels = [self.label_map[i] for i in idx]
             qids = qids.numpy().tolist()
             result.extend(zip(qids, labels))
-        self.save_result(result)
-
-    def save_result(self, result):
-        res_dir = os.path.join(self.config.res_dir, self.config.model_name)
-        mkdir_if_not_exist(res_dir)
-        # 写入预测结果
-        with open(os.path.join(res_dir, "result.csv"), "w", encoding="utf-8") as f:
-            writer = csv.writer(f)
-            writer.writerow(["id", "class"])
-            for line in result:
-                qid, label = line
-                writer.writerow([qid[0], label])
+        return result
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len=512):

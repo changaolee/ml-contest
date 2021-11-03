@@ -43,7 +43,7 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
         model = DataFountain529SentaBertBaselineModel.from_pretrained("bert-wwm-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-wwm-chinese")
     else:
-        logger.error("load model error.".format(model_name))
+        logger.error("load model error: {}.".format(model_name))
     return model, tokenizer
 
 
