@@ -116,14 +116,18 @@ class DataFountain529SentaTrainer(object):
         for epoch in range(1, self.epochs + 1):
             for step, batch in enumerate(self.train_data_loader, start=1):
                 input_ids, token_type_ids, labels = batch
+
                 # 喂数据给 model
                 logits = self.model(input_ids, token_type_ids)
+
                 # 计算损失函数值
                 loss = self.criterion(logits, labels)
+
                 # 预测分类概率值
                 probs = F.softmax(logits, axis=1)
-                # 计算 kappa
                 preds = paddle.argmax(probs, axis=1, keepdim=True)
+
+                # 计算 kappa
                 self.metric.update(preds, labels)
                 kappa = self.metric.accumulate()
 
