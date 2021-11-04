@@ -20,11 +20,11 @@ def predict():
 
     k_fold_result = []
     k_fold_models = {
-        1: "model_300",
-        2: "model_500",
-        3: "model_900",
-        4: "model_600",
-        5: "model_300"
+        1: "model_400",
+        2: "model_400",
+        3: "model_400",
+        4: "model_400",
+        5: "model_400"
     }
     for fold in range(1, config.k_fold + 1):
         # 获取测试集
