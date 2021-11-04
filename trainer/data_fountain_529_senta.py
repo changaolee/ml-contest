@@ -89,7 +89,7 @@ class DataFountain529SentaTrainer(object):
         self.num_training_steps = len(self.train_data_loader) * self.epochs
 
         # 定义 learning_rate_scheduler，负责在训练过程中对 lr 进行调度
-        lr_scheduler = LinearDecayWithWarmup(self.config.learning_rate, self.num_training_steps, 0.0)
+        self.lr_scheduler = LinearDecayWithWarmup(self.config.learning_rate, self.num_training_steps, 0.0)
 
         # Generate parameter names needed to perform weight decay.
         # All bias and LayerNorm parameters are excluded.
@@ -99,13 +99,13 @@ class DataFountain529SentaTrainer(object):
         ]
         # 定义 Optimizer
         self.optimizer = paddle.optimizer.AdamW(
-            learning_rate=lr_scheduler,
+            learning_rate=self.lr_scheduler,
             parameters=self.model.parameters(),
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
         # 交叉熵损失函数
-        self.criterion = FocalLoss(weight=[0.106, 0.038, 0.856])
+        self.criterion = paddle.nn.loss.CrossEntropyLoss()
         # kappa 评价指标
         self.metric = Kappa(self.config.num_classes)
 
@@ -146,6 +146,7 @@ class DataFountain529SentaTrainer(object):
                 # 反向梯度回传，更新参数
                 loss.backward()
                 self.optimizer.step()
+                self.lr_scheduler.step()
                 self.optimizer.clear_grad()
 
                 if global_step % 100 == 0:
