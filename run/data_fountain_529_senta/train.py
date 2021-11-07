@@ -33,7 +33,7 @@ def train():
         )
 
         # 开始训练
-        trainer.train()
+        trainer.train_v2()
 
 
 def get_model_and_tokenizer(model_name: str, config: Bunch):
