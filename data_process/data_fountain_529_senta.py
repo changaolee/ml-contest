@@ -33,8 +33,6 @@ class DataFountain529SentaDataProcessor(object):
         self.random_state = config.random_state
 
     def process(self, override=False):
-        assert 2 <= self.k_fold <= 10, "交叉验证折数应在 2 到 10 之间"
-
         if not override and \
                 os.path.isfile(self.train_path) and \
                 os.path.isfile(self.dev_path) and \
@@ -53,7 +51,8 @@ class DataFountain529SentaDataProcessor(object):
         df = pd.read_csv(self.train_data_path, encoding="utf-8")
         X, y = df.drop(['id', 'class'], axis=1), df['class']
 
-        skf = StratifiedKFold(n_splits=self.k_fold,
+        k_fold = int(1 / self.config.dev_prop) if self.k_fold == 0 else self.k_fold
+        skf = StratifiedKFold(n_splits=k_fold,
                               shuffle=True,
                               random_state=self.random_state).split(X, y)
 
@@ -76,6 +75,9 @@ class DataFountain529SentaDataProcessor(object):
                 for i in range(len(dev_idx)):
                     cur_X, cur_y = X.iloc[dev_idx[i]], y.iloc[dev_idx[i]]
                     dev_writer.writerow([cur_X["text"], cur_y])
+
+            if self.k_fold == 0:
+                break
 
     def test_dataset_save(self):
         df = pd.read_csv(self.test_data_path, encoding="utf-8")

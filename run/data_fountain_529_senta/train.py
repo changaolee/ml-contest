@@ -16,7 +16,8 @@ def train():
     data_processor.process()
     config = data_processor.config
 
-    for fold in range(1, config.k_fold + 1):
+    folds = [1] if config.k_fold == 0 else range(1, config.k_fold + 1)
+    for fold in folds:
         config.fold = fold
 
         # 获取训练集、开发集
