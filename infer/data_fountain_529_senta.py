@@ -54,6 +54,8 @@ class DataFountain529SentaInfer(object):
             state_dict = paddle.load(model_params_path)
             self.model.set_dict(state_dict)
             self.logger.info("Loaded parameters from {}".format(model_params_path))
+        else:
+            self.logger.error("Loaded parameters error from {}".format(model_params_path))
 
     def predict(self):
         result = []
