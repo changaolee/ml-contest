@@ -20,13 +20,9 @@ def predict():
 
     k_fold_result = []
     k_fold_models = {
-        1: "model_400",
-        2: "model_400",
-        3: "model_400",
-        4: "model_400",
-        5: "model_400"
+        1: "model_200"
     }
-    for fold in range(1, config.k_fold + 1):
+    for fold, model_path in enumerate(k_fold_models):
         # 获取测试集
         [test_ds] = DataFountain529SentaDataset(config).load_data(splits=['test'], lazy=False)
 
@@ -34,7 +30,7 @@ def predict():
         model, tokenizer = get_model_and_tokenizer(config.model_name, config)
 
         # 获取推断器
-        config.model_path = os.path.join(config.ckpt_dir, config.model_name, k_fold_models[fold])
+        config.model_path = os.path.join(config.ckpt_dir, config.model_name, model_path)
         infer = DataFountain529SentaInfer(model, tokenizer=tokenizer, test_ds=test_ds, config=config)
 
         # 开始预测
@@ -74,8 +70,8 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     model, tokenizer = None, None
     logger = config.logger
     if model_name == "bert_baseline":
-        model = DataFountain529SentaBertBaselineModel.from_pretrained("bert-wwm-chinese", config=config)
-        tokenizer = BertTokenizer.from_pretrained("bert-wwm-chinese")
+        model = DataFountain529SentaBertBaselineModel.from_pretrained("bert-base-chinese", config=config)
+        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     else:
         logger.error("load model error: {}.".format(model_name))
     return model, tokenizer
