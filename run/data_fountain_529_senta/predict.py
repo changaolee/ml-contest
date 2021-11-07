@@ -20,7 +20,16 @@ def predict():
 
     k_fold_result = []
     k_fold_models = {
-        1: "fold_1/model_200"
+        1: "model_300",
+        2: "model_300",
+        3: "model_300",
+        4: "model_300",
+        5: "model_300",
+        6: "model_318",
+        7: "model_300",
+        8: "model_200",
+        9: "model_200",
+        10: "model_200",
     }
     for fold, model_path in k_fold_models.items():
         # 获取测试集
@@ -30,7 +39,7 @@ def predict():
         model, tokenizer = get_model_and_tokenizer(config.model_name, config)
 
         # 获取推断器
-        config.model_path = os.path.join(config.ckpt_dir, config.model_name, model_path)
+        config.model_path = os.path.join(config.ckpt_dir, config.model_name, "fold_{}/{}".format(fold, model_path))
         infer = DataFountain529SentaInfer(model, tokenizer=tokenizer, test_ds=test_ds, config=config)
 
         # 开始预测
