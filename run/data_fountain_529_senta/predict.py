@@ -22,7 +22,7 @@ def predict():
     k_fold_models = {
         1: "model_200"
     }
-    for fold, model_path in enumerate(k_fold_models):
+    for fold, model_path in k_fold_models.items():
         # 获取测试集
         [test_ds] = DataFountain529SentaDataset(config).load_data(splits=['test'], lazy=False)
 
