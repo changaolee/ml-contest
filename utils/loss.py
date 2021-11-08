@@ -10,13 +10,18 @@ class FocalLoss(paddle.nn.Layer):
         self.gamma = gamma
 
     def forward(self, logits, labels):
-        pred = F.softmax(logits, axis=1)
-        one_hot = F.one_hot(labels.flatten(), self.num_classes)
-        cross_entropy = one_hot * paddle.fluid.layers.log(pred)
-        cross_entropy = paddle.fluid.layers.reduce_sum(cross_entropy, dim=-1)
-        weight = -1.0 * one_hot * paddle.fluid.layers.pow((1.0 - pred), self.gamma)
+        probs = F.softmax(logits, axis=1)
+        labels = F.one_hot(labels.flatten(), self.num_classes)
+
+        log_pt = labels * paddle.fluid.layers.log(probs)
+        log_pt = paddle.fluid.layers.reduce_sum(log_pt, dim=-1)
+
+        weight = -1.0 * labels * paddle.fluid.layers.pow((1.0 - probs), self.gamma)
         weight = paddle.fluid.layers.reduce_sum(weight, dim=-1)
-        ax = self.alpha * one_hot
-        alpha = paddle.fluid.layers.reduce_sum(ax, dim=-1)
-        loss = alpha * weight * cross_entropy
-        return loss.sum()
+
+        alpha = self.alpha * labels
+        alpha = paddle.fluid.layers.reduce_sum(alpha, dim=-1)
+
+        loss = alpha * weight * log_pt
+
+        return loss.mean()
