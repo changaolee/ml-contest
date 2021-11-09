@@ -160,9 +160,9 @@ class DataFountain529SentaTrainer(object):
                     self.evaluate(global_step=global_step)
                     # 保存当前模型参数等
                     paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
-                    paddle.save(self.optimizer.state_dict(), os.path.join(save_dir, "opt.optparams"))
-                    # 保存 tokenizer 的词表等
-                    self.tokenizer.save_pretrained(save_dir)
+                    # paddle.save(self.optimizer.state_dict(), os.path.join(save_dir, "opt.optparams"))
+                    # # 保存 tokenizer 的词表等
+                    # self.tokenizer.save_pretrained(save_dir)
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len=512):
