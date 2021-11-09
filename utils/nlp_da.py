@@ -1,27 +1,31 @@
 import time
-
 import nlpcda
 
 
 class NlpDA(object):
     rdw = None
     smw = None
+    hmp = None
 
     BAIDU_APP_ID = "20181215000248582"
     BAIDU_TRANS_SECRET_KEY = "h1QgNKc7SRDqwA3gVNpC"
 
     def __init__(self,
                  random_word_options: dict = None,
-                 similar_word_options: dict = None):
+                 similar_word_options: dict = None,
+                 homophone_options: dict = None):
         """
         :param random_word_options: 随机（等价）实体替换参数
         :param similar_word_options: 随机同义词替换参数
+        :param homophone_options: 随机近义近音词替换参数
         :return:
         """
         if random_word_options:
             self.rdw = nlpcda.Randomword(**random_word_options)
         if similar_word_options:
             self.smw = nlpcda.Similarword(**similar_word_options)
+        if homophone_options:
+            self.hmp = nlpcda.Homophone(**homophone_options)
 
     def generate(self, data):
         result = []
@@ -34,7 +38,11 @@ class NlpDA(object):
         if self.smw:
             result += self.smw.replace(data)
 
-        # 英法互译
+        # 随机近义近音词替换
+        if self.hmp:
+            result += self.hmp.replace(data)
+
+        # 英汉互译
         trs_path = [('zh', 'en'), ('en', 'zh')]
         trs_data = data
         for path in trs_path:
@@ -62,6 +70,10 @@ if __name__ == "__main__":
             "change_rate": 0.3
         },
         similar_word_options={
+            "create_num": 3,
+            "change_rate": 0.3
+        },
+        homophone_options={
             "create_num": 3,
             "change_rate": 0.3
         }
