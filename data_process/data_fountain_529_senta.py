@@ -15,6 +15,9 @@ class DataFountain529SentaDataProcessor(object):
         self.train_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.train_filename)
         self.test_data_path = os.path.join(DATA_PATH, self.config.exp_name, self.config.test_filename)
 
+        # 获取类别分类占比
+        self.config.label_dist = self.get_label_dist()
+
         # 处理后的数据集路径
         processed_path = os.path.join(DATA_PATH, self.config.exp_name, "processed")
         mkdir_if_not_exist(processed_path)
@@ -31,6 +34,14 @@ class DataFountain529SentaDataProcessor(object):
         # 数据集划分配置
         self.k_fold = config.k_fold
         self.random_state = config.random_state
+
+    def get_label_dist(self):
+        df = pd.read_csv(self.train_data_path, encoding="utf-8")
+        label_prop = df["class"].value_counts() / len(df)
+        dist = [0.] * len(label_prop)
+        for label, prop in label_prop.iteritems():
+            dist[label] = prop
+        return dist
 
     def process(self, override=False):
         if not override and \
