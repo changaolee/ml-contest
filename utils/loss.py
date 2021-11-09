@@ -4,7 +4,7 @@ import numpy as np
 
 
 class FocalLoss(paddle.nn.Layer):
-    def __init__(self, num_classes, alpha, gamma=2):
+    def __init__(self, num_classes, alpha, gamma=5):
         super().__init__()
         self.num_classes = num_classes
         self.alpha = paddle.to_tensor(alpha, dtype=np.float32)
@@ -25,4 +25,4 @@ class FocalLoss(paddle.nn.Layer):
 
         loss = alpha * weight * log_pt
 
-        return loss.mean()
+        return loss.sum()
