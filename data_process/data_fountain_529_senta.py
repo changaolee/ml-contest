@@ -50,13 +50,18 @@ class DataFountain529SentaDataProcessor(object):
                 os.path.isfile(self.test_path):
             return
 
+        # 数据增强
+        self.data_augmentation()
+
         # 训练集、开发集划分
         self.train_dev_dataset_split()
 
-        # TODO: 数据增强
-
         # 测试集保存
         self.test_dataset_save()
+
+    def data_augmentation(self):
+        # TODO
+        pass
 
     def train_dev_dataset_split(self):
         df = pd.read_csv(self.train_data_path, encoding="utf-8")
