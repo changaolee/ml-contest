@@ -70,19 +70,22 @@ class NlpDA(object):
             result += self.eqc.replace(data)
 
         # 英汉互译
-        trs_path = [('zh', 'en'), ('en', 'zh')]
-        trs_data = data
-        for path in trs_path:
-            t_from, t_to = path
-            trs_data = nlpcda.baidu_translate(
-                content=trs_data,
-                appid=self.BAIDU_APP_ID,
-                secretKey=self.BAIDU_TRANS_SECRET_KEY,
-                t_from=t_from,
-                t_to=t_to
-            )
-            time.sleep(1)
-        result.append(trs_data)
+        try:
+            trs_path = [('zh', 'en'), ('en', 'zh')]
+            trs_data = data
+            for path in trs_path:
+                t_from, t_to = path
+                trs_data = nlpcda.baidu_translate(
+                    content=trs_data,
+                    appid=self.BAIDU_APP_ID,
+                    secretKey=self.BAIDU_TRANS_SECRET_KEY,
+                    t_from=t_from,
+                    t_to=t_to
+                )
+                time.sleep(1)
+            result.append(trs_data)
+        except Exception as err:
+            print("trans data augmentation error:", err)
 
         return list(set(result))
 
