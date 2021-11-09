@@ -7,6 +7,7 @@ ROOT_PATH = os.path.abspath(os.path.join(os.path.realpath(__file__), "../.."))
 
 DATA_PATH = os.path.join(ROOT_PATH, "data")
 CONFIG_PATH = os.path.join(ROOT_PATH, "config")
+RESOURCE_PATH = os.path.join(ROOT_PATH, "resource")
 
 
 def get_config(json_file):

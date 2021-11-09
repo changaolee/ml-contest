@@ -1,7 +1,8 @@
 from sklearn.model_selection import StratifiedKFold
 from bunch import Bunch
 from utils.utils import mkdir_if_not_exist
-from utils.config_utils import DATA_PATH
+from utils.config_utils import DATA_PATH, RESOURCE_PATH
+from utils.nlp_da import NlpDA
 import pandas as pd
 import csv
 import os
@@ -19,17 +20,19 @@ class DataFountain529SentaDataProcessor(object):
         self.config.label_dist = self.get_label_dist()
 
         # 处理后的数据集路径
-        processed_path = os.path.join(DATA_PATH, self.config.exp_name, "processed")
-        mkdir_if_not_exist(processed_path)
-        self.train_path = os.path.join(processed_path, "train_{}.csv")
-        self.dev_path = os.path.join(processed_path, "dev_{}.csv")
-        self.test_path = os.path.join(processed_path, "test.csv")
+        self.processed_path = os.path.join(DATA_PATH, self.config.exp_name, "processed")
+        mkdir_if_not_exist(self.processed_path)
+        self.train_path = os.path.join(self.processed_path, "train_{}.csv")
+        self.dev_path = os.path.join(self.processed_path, "dev_{}.csv")
+        self.test_path = os.path.join(self.processed_path, "test.csv")
 
         self.config.splits = {
             "train": self.train_path,
             "dev": self.dev_path,
             "test": self.test_path
         }
+
+        self.logger = self.config.logger
 
         # 数据集划分配置
         self.k_fold = config.k_fold
@@ -44,10 +47,9 @@ class DataFountain529SentaDataProcessor(object):
         return dist
 
     def process(self, override=False):
-        if not override and \
-                os.path.isfile(self.train_path) and \
-                os.path.isfile(self.dev_path) and \
-                os.path.isfile(self.test_path):
+        # 非强制覆盖，且文件夹非空，跳过处理
+        if not override and os.listdir(self.processed_path):
+            self.logger.info("skip process data")
             return
 
         # 数据增强
@@ -60,8 +62,44 @@ class DataFountain529SentaDataProcessor(object):
         self.test_dataset_save()
 
     def data_augmentation(self):
-        # TODO
-        pass
+        data_augmentation_path = os.path.join(self.processed_path, "data_augmentation")
+        mkdir_if_not_exist(data_augmentation_path)
+
+        bank_entity_path = os.path.join(RESOURCE_PATH, "entity/bank.txt")
+        nlp_da = NlpDA(
+            random_word_options={"base_file": bank_entity_path, "create_num": 3, "change_rate": 0.3},
+            similar_word_options={"create_num": 3, "change_rate": 0.3},
+            homophone_options={"create_num": 3, "change_rate": 0.3},
+            random_delete_char_options={"create_num": 3, "change_rate": 0.3},
+            char_position_exchange_options={"create_num": 3, "change_rate": 0.3, "char_gram": 2},
+            equivalent_char_options={"create_num": 3, "change_rate": 0.3}
+        )
+
+        # 训练数据
+        train_df = pd.read_csv(self.train_data_path, encoding="utf-8")
+        self.train_data_path = os.path.join(data_augmentation_path, "train.csv")
+
+        with open(self.train_data_path, "w", encoding="utf-8") as train_f:
+            train_writer = csv.writer(train_f)
+            train_writer.writerow(["id", "text", "class"])  # 保持与原始数据一致
+
+            for idx, line in train_df.iterrows():
+                _id, text, label = line.get("id", ""), line.get("text", ""), line.get("class", "")
+                for da_text in nlp_da.generate(text):
+                    train_writer.writerow([_id, da_text, label])
+
+        # 测试数据
+        test_df = pd.read_csv(self.test_data_path, encoding="utf-8")
+        self.test_data_path = os.path.join(data_augmentation_path, "test.csv")
+
+        with open(self.test_data_path, "w", encoding="utf-8") as test_f:
+            test_writer = csv.writer(test_f)
+            test_writer.writerow(["id", "text"])
+
+            for idx, line in test_df.iterrows():
+                _id, text = line.get("id", ""), line.get("text", "")
+                for da_text in nlp_da.generate(text):
+                    test_writer.writerow([_id, da_text])
 
     def train_dev_dataset_split(self):
         df = pd.read_csv(self.train_data_path, encoding="utf-8")
