@@ -15,21 +15,13 @@ def predict():
 
     # 原始数据预处理
     data_processor = DataFountain529SentaDataProcessor(config)
+    data_processor.data_augmentation()
     data_processor.process()
     config = data_processor.config
 
     k_fold_result = []
     k_fold_models = {
-        1: "model_300",
-        2: "model_300",
-        3: "model_300",
-        4: "model_300",
-        5: "model_300",
-        6: "model_318",
-        7: "model_300",
-        8: "model_200",
-        9: "model_200",
-        10: "model_200",
+        1: "model_2000",
     }
     for fold, model_path in k_fold_models.items():
         # 获取测试集
@@ -44,6 +36,7 @@ def predict():
 
         # 开始预测
         fold_result = infer.predict()
+        fold_result = merge_tta_result(fold_result)
         k_fold_result.append(fold_result)
 
     # 融合 k 折模型的预测结果
@@ -60,17 +53,37 @@ def predict():
             writer.writerow([qid, label])
 
 
+def merge_tta_result(tta_result):
+    tta = {}
+    for record in tta_result:
+        qid, label = record[0][0], record[1]
+        if qid not in tta:
+            tta[qid] = {"0": 0, "1": 0, "2": 0}
+        tta[qid][label] += 1
+
+    # 按 qid 排序
+    tta = sorted(tta.items(), key=lambda x: x[0])
+
+    result = []
+    for record in tta:
+        qid, labels = record
+        labels = sorted(labels.items(), key=lambda x: x[1], reverse=True)
+        label = labels[0][0] if labels[0][1] > len(labels) // 2 else "2"
+        result.append([qid, label])
+    return result
+
+
 def merge_k_fold_result(k_fold_result):
     k, n = len(k_fold_result), len(k_fold_result[0])
     result = []
     for i in range(n):
-        qid = k_fold_result[0][i][0][0]
+        qid = k_fold_result[0][i][0]
         labels = {}
         for j in range(k):
             label = k_fold_result[j][i][1]
             labels[label] = labels.get(label, 0) + 1
         labels = sorted(labels.items(), key=lambda x: x[1], reverse=True)
-        label = labels[0][0] if labels[0][1] > k // 2 else 2
+        label = labels[0][0] if labels[0][1] > k // 2 else "2"
         result.append([qid, label])
     return result
 
