@@ -13,6 +13,7 @@ def train():
 
     # 原始数据预处理
     data_processor = DataFountain529SentaDataProcessor(config)
+    data_processor.data_augmentation()
     data_processor.process()
     config = data_processor.config
 

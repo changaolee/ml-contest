@@ -19,6 +19,10 @@ class DataFountain529SentaDataProcessor(object):
         # 获取类别分类占比
         self.config.label_dist = self.get_label_dist()
 
+        # 数据增强路径
+        self.data_augmentation_path = os.path.join(DATA_PATH, self.config.exp_name, "data_augmentation")
+        mkdir_if_not_exist(self.data_augmentation_path)
+
         # 处理后的数据集路径
         self.processed_path = os.path.join(DATA_PATH, self.config.exp_name, "processed")
         mkdir_if_not_exist(self.processed_path)
@@ -49,11 +53,8 @@ class DataFountain529SentaDataProcessor(object):
     def process(self, override=False):
         # 非强制覆盖，且文件夹非空，跳过处理
         if not override and os.listdir(self.processed_path):
-            self.logger.info("skip process data")
+            self.logger.info("skip data process")
             return
-
-        # 数据增强
-        self.data_augmentation()
 
         # 训练集、开发集划分
         self.train_dev_dataset_split()
@@ -62,8 +63,12 @@ class DataFountain529SentaDataProcessor(object):
         self.test_dataset_save()
 
     def data_augmentation(self):
-        data_augmentation_path = os.path.join(self.processed_path, "data_augmentation")
-        mkdir_if_not_exist(data_augmentation_path)
+        # 文件夹非空，跳过数据增强
+        if os.listdir(self.data_augmentation_path):
+            self.train_data_path = os.path.join(self.data_augmentation_path, "train.csv")
+            self.test_data_path = os.path.join(self.data_augmentation_path, "test.csv")
+            self.logger.info("skip data augmentation")
+            return
 
         bank_entity_path = os.path.join(RESOURCE_PATH, "entity/bank.txt")
         nlp_da = NlpDA(
@@ -77,7 +82,7 @@ class DataFountain529SentaDataProcessor(object):
 
         # 训练数据
         train_df = pd.read_csv(self.train_data_path, encoding="utf-8")
-        self.train_data_path = os.path.join(data_augmentation_path, "train.csv")
+        self.train_data_path = os.path.join(self.data_augmentation_path, "train.csv")
 
         with open(self.train_data_path, "w", encoding="utf-8") as train_f:
             train_writer = csv.writer(train_f)
@@ -90,7 +95,7 @@ class DataFountain529SentaDataProcessor(object):
 
         # 测试数据
         test_df = pd.read_csv(self.test_data_path, encoding="utf-8")
-        self.test_data_path = os.path.join(data_augmentation_path, "test.csv")
+        self.test_data_path = os.path.join(self.data_augmentation_path, "test.csv")
 
         with open(self.test_data_path, "w", encoding="utf-8") as test_f:
             test_writer = csv.writer(test_f)
