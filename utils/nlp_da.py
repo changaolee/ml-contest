@@ -82,7 +82,7 @@ class NlpDA(object):
         except Exception as err:
             print("trans data augmentation error:", err)
 
-        return list(set(result))
+        return list(set(filter(None, result)))
 
 
 if __name__ == "__main__":
