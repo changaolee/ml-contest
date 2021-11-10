@@ -15,6 +15,6 @@
   "num_classes": 3,
 
   "batch_size": 64,
-  "train_epochs": 10,
+  "train_epochs": 5,
   "learning_rate": 5e-5
 }
