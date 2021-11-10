@@ -4,6 +4,7 @@ from utils.utils import mkdir_if_not_exist
 from utils.config_utils import DATA_PATH, RESOURCE_PATH
 from utils.nlp_da import NlpDA
 import pandas as pd
+import random
 import csv
 import os
 
@@ -120,11 +121,14 @@ class DataFountain529SentaDataProcessor(object):
                 train_writer = csv.writer(train_f)
                 train_writer.writerow(["text", "label"])
 
+                rows = []
                 for i in range(len(train_idx)):
                     cur_X, cur_y = X.iloc[train_idx[i]], y.iloc[train_idx[i]]
                     da_texts = da_df.loc[da_df["id"] == cur_X["id"]]["text"].values.tolist()
                     for da_text in da_texts:
-                        train_writer.writerow([da_text, cur_y])
+                        rows.append([da_text, cur_y])
+                random.shuffle(rows)
+                train_writer.writerows(rows)
 
             dev_path = self.dev_path.format(k + 1)
             with open(dev_path, "w", encoding="utf-8") as dev_f:
