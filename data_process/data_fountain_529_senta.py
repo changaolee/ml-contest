@@ -22,6 +22,8 @@ class DataFountain529SentaDataProcessor(object):
         # 数据增强路径
         self.data_augmentation_path = os.path.join(DATA_PATH, self.config.exp_name, "data_augmentation")
         mkdir_if_not_exist(self.data_augmentation_path)
+        self.da_train_data_path = os.path.join(self.data_augmentation_path, "train.csv")
+        self.da_test_data_path = os.path.join(self.data_augmentation_path, "test.csv")
 
         # 处理后的数据集路径
         self.processed_path = os.path.join(DATA_PATH, self.config.exp_name, "processed")
@@ -65,8 +67,6 @@ class DataFountain529SentaDataProcessor(object):
     def data_augmentation(self):
         # 文件夹非空，跳过数据增强
         if os.listdir(self.data_augmentation_path):
-            self.train_data_path = os.path.join(self.data_augmentation_path, "train.csv")
-            self.test_data_path = os.path.join(self.data_augmentation_path, "test.csv")
             self.logger.info("skip data augmentation")
             return
 
@@ -82,9 +82,7 @@ class DataFountain529SentaDataProcessor(object):
 
         # 训练数据
         train_df = pd.read_csv(self.train_data_path, encoding="utf-8")
-        self.train_data_path = os.path.join(self.data_augmentation_path, "train.csv")
-
-        with open(self.train_data_path, "w", encoding="utf-8") as train_f:
+        with open(self.da_train_data_path, "w", encoding="utf-8") as train_f:
             train_writer = csv.writer(train_f)
             train_writer.writerow(["id", "text", "class"])  # 保持与原始数据一致
 
@@ -95,9 +93,7 @@ class DataFountain529SentaDataProcessor(object):
 
         # 测试数据
         test_df = pd.read_csv(self.test_data_path, encoding="utf-8")
-        self.test_data_path = os.path.join(self.data_augmentation_path, "test.csv")
-
-        with open(self.test_data_path, "w", encoding="utf-8") as test_f:
+        with open(self.da_test_data_path, "w", encoding="utf-8") as test_f:
             test_writer = csv.writer(test_f)
             test_writer.writerow(["id", "text"])
 
@@ -108,7 +104,9 @@ class DataFountain529SentaDataProcessor(object):
 
     def train_dev_dataset_split(self):
         df = pd.read_csv(self.train_data_path, encoding="utf-8")
-        X, y = df.drop(['id', 'class'], axis=1), df['class']
+        da_df = pd.read_csv(self.da_train_data_path, encoding="utf-8")
+
+        X, y = df.drop(['class'], axis=1), df['class']
 
         k_fold = int(1 / self.config.dev_prop) if self.k_fold == 0 else self.k_fold
         skf = StratifiedKFold(n_splits=k_fold,
@@ -124,7 +122,9 @@ class DataFountain529SentaDataProcessor(object):
 
                 for i in range(len(train_idx)):
                     cur_X, cur_y = X.iloc[train_idx[i]], y.iloc[train_idx[i]]
-                    train_writer.writerow([cur_X["text"], cur_y])
+                    da_texts = da_df.loc[da_df["id"] == cur_X["id"]]["text"].values.tolist()
+                    for da_text in da_texts:
+                        train_writer.writerow([da_text, cur_y])
 
             dev_path = self.dev_path.format(k + 1)
             with open(dev_path, "w", encoding="utf-8") as dev_f:
