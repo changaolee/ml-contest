@@ -104,11 +104,11 @@ class DataFountain529SentaTrainer(object):
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
-        # # 交叉熵损失函数
-        # self.criterion = paddle.nn.loss.CrossEntropyLoss()
+        # 交叉熵损失函数
+        self.criterion = paddle.nn.loss.CrossEntropyLoss()
 
-        # Focal Loss
-        self.criterion = FocalLoss(self.config.num_classes, alpha=self.config.label_dist, gamma=2)
+        # # Focal Loss
+        # self.criterion = FocalLoss(self.config.num_classes, alpha=self.config.label_dist, gamma=2)
 
         # kappa 评价指标
         self.metric = Kappa(self.config.num_classes)
@@ -153,7 +153,7 @@ class DataFountain529SentaTrainer(object):
                 self.lr_scheduler.step()
                 self.optimizer.clear_grad()
 
-                if global_step % 500 == 0 or global_step == self.num_training_steps:
+                if global_step % 300 == 0 or global_step == self.num_training_steps:
                     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
                     mkdir_if_not_exist(save_dir)
 
