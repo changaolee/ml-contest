@@ -70,17 +70,17 @@ class NlpDA(object):
         if self.eqc:
             result += self.eqc.replace(data)
 
-        # 英汉互译（语言代码见：googletrans.LANGUAGES）
-        try:
-            trs_path = [("zh-cn", "en"), ("en", "ja"), ("ja", "zh-cn")]
-            trs_data = data
-            for path in trs_path:
-                t_from, t_to = path
-                trs_data = self.tra.translate(trs_data, src=t_from, dest=t_to).text
-                time.sleep(random.randint(50, 300) / 100)
-            result.append(trs_data)
-        except Exception as err:
-            print("trans data augmentation error:", err)
+        # # 英汉互译（语言代码见：googletrans.LANGUAGES）
+        # try:
+        #     trs_path = [("zh-cn", "en"), ("en", "ja"), ("ja", "zh-cn")]
+        #     trs_data = data
+        #     for path in trs_path:
+        #         t_from, t_to = path
+        #         trs_data = self.tra.translate(trs_data, src=t_from, dest=t_to).text
+        #         time.sleep(random.randint(50, 300) / 100)
+        #     result.append(trs_data)
+        # except Exception as err:
+        #     print("trans data augmentation error:", err)
 
         return list(set(filter(None, result)))
 
@@ -89,12 +89,12 @@ if __name__ == "__main__":
     test_str = '''兴业银行今天用了我们本地的号码打我电话了0579，说今天下午6点还是没有结果把我拉进兴业银行黑名单，走法律流程，我欠兴业银行2万1...'''
 
     nlp_da = NlpDA(
-        random_word_options={"base_file": "../resource/entity/bank.txt", "create_num": 3, "change_rate": 0.3},
-        similar_word_options={"create_num": 3, "change_rate": 0.3},
-        homophone_options={"create_num": 3, "change_rate": 0.3},
-        random_delete_char_options={"create_num": 3, "change_rate": 0.3},
-        char_position_exchange_options={"create_num": 3, "change_rate": 0.3, "char_gram": 2},
-        equivalent_char_options={"create_num": 3, "change_rate": 0.3}
+        random_word_options={"base_file": "../resource/entity/bank.txt", "create_num": 2, "change_rate": 0.3},
+        similar_word_options={"create_num": 2, "change_rate": 0.3},
+        homophone_options={"create_num": 2, "change_rate": 0.3},
+        random_delete_char_options={"create_num": 2, "change_rate": 0.3},
+        char_position_exchange_options={"create_num": 2, "change_rate": 0.3, "char_gram": 2},
+        equivalent_char_options={"create_num": 2, "change_rate": 0.3}
     )
 
     for text in nlp_da.generate(test_str):
