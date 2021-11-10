@@ -1,5 +1,7 @@
-import time
+from googletrans import Translator
 import nlpcda
+import random
+import time
 
 
 class NlpDA(object):
@@ -9,9 +11,7 @@ class NlpDA(object):
     rdc = None
     cpe = None
     eqc = None
-
-    BAIDU_APP_ID = "20181215000248582"
-    BAIDU_TRANS_SECRET_KEY = "h1QgNKc7SRDqwA3gVNpC"
+    tra = None
 
     def __init__(self,
                  random_word_options: dict = None,
@@ -41,9 +41,10 @@ class NlpDA(object):
             self.cpe = nlpcda.CharPositionExchange(**char_position_exchange_options)
         if equivalent_char_options:
             self.eqc = nlpcda.EquivalentChar(**equivalent_char_options)
+        self.tra = Translator(service_urls=['translate.google.cn'])
 
     def generate(self, data):
-        result = []
+        result = [data]
 
         # 随机实体替换
         if self.rdw:
@@ -69,20 +70,14 @@ class NlpDA(object):
         if self.eqc:
             result += self.eqc.replace(data)
 
-        # 英汉互译
+        # 英汉互译（语言代码见：googletrans.LANGUAGES）
         try:
-            trs_path = [('zh', 'en'), ('en', 'zh')]
+            trs_path = [("zh-cn", "en"), ("en", "ja"), ("ja", "zh-cn")]
             trs_data = data
             for path in trs_path:
                 t_from, t_to = path
-                trs_data = nlpcda.baidu_translate(
-                    content=trs_data,
-                    appid=self.BAIDU_APP_ID,
-                    secretKey=self.BAIDU_TRANS_SECRET_KEY,
-                    t_from=t_from,
-                    t_to=t_to
-                )
-                time.sleep(1)
+                trs_data = self.tra.translate(trs_data, src=t_from, dest=t_to).text
+                time.sleep(random.randint(50, 300) / 100)
             result.append(trs_data)
         except Exception as err:
             print("trans data augmentation error:", err)
