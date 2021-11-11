@@ -21,7 +21,7 @@ def predict():
 
     k_fold_result = []
     k_fold_models = {
-        1: "model_2000",
+        1: "model_270",
     }
     for fold, model_path in k_fold_models.items():
         # 获取测试集
@@ -67,8 +67,9 @@ def merge_tta_result(tta_result):
     result = []
     for record in tta:
         qid, labels = record
+        tta_cnt = sum(labels.values())
         labels = sorted(labels.items(), key=lambda x: x[1], reverse=True)
-        label = labels[0][0] if labels[0][1] > len(labels) // 2 else "2"
+        label = labels[0][0] if labels[0][1] > tta_cnt // 2 else "2"
         result.append([qid, label])
     return result
 
