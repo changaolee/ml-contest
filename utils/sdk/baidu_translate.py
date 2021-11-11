@@ -35,7 +35,7 @@ class BaiduTranslate(object):
 
                 text = result['trans_result'][0]['dst']
 
-                time.sleep(1)
+                time.sleep(0.1)
         except Exception as e:
             print(e)
         finally:

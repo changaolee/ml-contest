@@ -4,9 +4,11 @@ from utils.utils import mkdir_if_not_exist
 from utils.config_utils import DATA_PATH, RESOURCE_PATH
 from utils.nlp_da import NlpDA
 import pandas as pd
+import string
 import random
 import csv
 import os
+import re
 
 
 class DataFountain529SentaDataProcessor(object):
@@ -74,7 +76,8 @@ class DataFountain529SentaDataProcessor(object):
         bank_entity_path = os.path.join(RESOURCE_PATH, "entity/bank.txt")
         nlp_da = NlpDA(
             random_word_options={"base_file": bank_entity_path, "create_num": 2, "change_rate": 0.3},
-            random_delete_char_options={"create_num": 2, "change_rate": 0.3},
+            random_delete_char_options={"create_num": 2, "change_rate": 0.2},
+            translate_options={"domain": "finance", "trans_path": [("zh", "en"), ("en", "zh")]}
         )
 
         # 训练数据
@@ -122,6 +125,7 @@ class DataFountain529SentaDataProcessor(object):
                     cur_X, cur_y = X.iloc[train_idx[i]], y.iloc[train_idx[i]]
                     da_texts = da_df.loc[da_df["id"] == cur_X["id"]]["text"].values.tolist()
                     for da_text in da_texts:
+                        da_text = self.text_clean(da_text)
                         rows.append([da_text, cur_y])
                 random.shuffle(rows)
                 train_writer.writerows(rows)
@@ -133,7 +137,8 @@ class DataFountain529SentaDataProcessor(object):
 
                 for i in range(len(dev_idx)):
                     cur_X, cur_y = X.iloc[dev_idx[i]], y.iloc[dev_idx[i]]
-                    dev_writer.writerow([cur_X["text"], cur_y])
+                    text = self.text_clean(cur_X["text"])
+                    dev_writer.writerow([text, cur_y])
 
             if self.k_fold == 0:
                 break
@@ -147,4 +152,48 @@ class DataFountain529SentaDataProcessor(object):
 
             for idx, line in df.iterrows():
                 _id, text = line.get("id", ""), line.get("text", "")
+                text = self.text_clean(text)
                 test_writer.writerow([_id, text])
+
+    @classmethod
+    def text_clean(cls, text):
+        # 去除空白字符及首尾标点
+        text = text.strip().strip(string.punctuation).replace(" ", "")
+
+        # 去除数字内部的逗号
+        p = re.compile(r"\d+,\d+?")
+        for m in p.finditer(text):
+            mm = m.group()
+            text = text.replace(mm, mm.replace(",", ""))
+
+        # 去除数字小数点
+        p = re.compile(r"\d+.\d+")
+        for m in p.finditer(text):
+            mm = m.group()
+            text = text.replace(mm, mm[0:mm.find(".")])
+
+        # 数字转换 k、K -> 千，w、W -> 万
+        p = re.compile(r"\d+[kKＫ千]?")
+        for m in p.finditer(text):
+            mm = m.group()
+            text = text.replace(mm, mm.replace("k", "000").replace("K", "000").replace("千", "000"))
+        p = re.compile(r"\d+[wWＷ万]?")
+        for m in p.finditer(text):
+            mm = m.group()
+            text = text.replace(mm, mm.replace("w", "0000").replace("W", "0000").replace("万", "0000"))
+
+        # 英文标点转中文标点
+        e_pun = u',.!?%[]()<>"\''
+        c_pun = u'，。！？％【】（）《》“‘'
+        table = {ord(f): ord(t) for f, t in zip(e_pun, c_pun)}
+        text = text.translate(table)
+
+        return text
+
+
+if __name__ == "__main__":
+    tests = [
+        '''   "  如果  你亏了钱，独家利息,2 千、2 万，20 万，10w，3k, 14.27W通常会有50%的折扣，而我只借360利息，期限为100,000个月。"'''
+    ]
+    for test_text in tests:
+        print(DataFountain529SentaDataProcessor.text_clean(test_text))
