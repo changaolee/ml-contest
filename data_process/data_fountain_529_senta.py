@@ -69,15 +69,25 @@ class DataFountain529SentaDataProcessor(object):
 
     def data_augmentation(self):
         # 文件夹非空，跳过数据增强
-        if os.listdir(self.data_augmentation_path):
+        if os.path.isfile(self.da_train_data_path) and os.path.isfile(self.da_test_data_path):
             self.logger.info("skip data augmentation")
             return
 
+        # 银行实体信息
         bank_entity_path = os.path.join(RESOURCE_PATH, "entity/bank.txt")
+
+        # 翻译缓存文件
+        da_cache_path = os.path.join(self.data_augmentation_path, "cache")
+        mkdir_if_not_exist(da_cache_path)
+        trans_cache_path = os.path.join(da_cache_path, "trans.json")
+
+        # 翻译路径：zh -> en -> zh
+        trans_path = [("zh", "en"), ("en", "zh")]
+
+        # 数据增强对象
         nlp_da = NlpDA(
             random_word_options={"base_file": bank_entity_path, "create_num": 2, "change_rate": 0.3},
-            random_delete_char_options={"create_num": 2, "change_rate": 0.2},
-            translate_options={"domain": "finance", "trans_path": [("zh", "en"), ("en", "zh")]}
+            translate_options={"domain": "finance", "trans_path": trans_path, "trans_cache_file": trans_cache_path}
         )
 
         # 训练数据

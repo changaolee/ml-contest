@@ -4,20 +4,30 @@ import time
 import urllib
 import random
 import json
+import os
 
 
 class BaiduTranslate(object):
-    BAIDU_APP_ID = "20181215000248582"
-    BAIDU_TRANS_SECRET_KEY = "h1QgNKc7SRDqwA3gVNpC"
+    BAIDU_APP_ID = "20211031000987740"
+    BAIDU_TRANS_SECRET_KEY = "eHbO4BwfJUXihnDz94E4"
 
-    def __init__(self, domain, trans_path, app_id=None, secret_key=None):
+    def __init__(self, domain, trans_path, trans_cache_file=None, app_id=None, secret_key=None):
         self.domain = domain
         self.app_id = app_id or self.BAIDU_APP_ID
         self.secret_key = secret_key or self.BAIDU_TRANS_SECRET_KEY
         self.trans_path = trans_path
+        self.trans_cache_file = trans_cache_file
+        self.trans_cache = {}
+        if os.path.isfile(trans_cache_file):
+            with open(trans_cache_file, "r") as f:
+                self.trans_cache = json.load(f)
         self.client = http.client.HTTPConnection('api.fanyi.baidu.com')
 
     def translate(self, text):
+        if text in self.trans_cache and self.trans_cache[text] != text:
+            return self.trans_cache[text]
+
+        raw_text = text
         try:
             for trans in self.trans_path:
                 from_lang, to_lang = trans
@@ -39,6 +49,8 @@ class BaiduTranslate(object):
         except Exception as e:
             print(e)
         finally:
-            if self.client:
-                self.client.close()
+            if text != raw_text:
+                self.trans_cache[raw_text] = text
+                with open(self.trans_cache_file, "w") as f:
+                    json.dump(self.trans_cache, f, indent=4, ensure_ascii=False)
         return text
