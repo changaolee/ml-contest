@@ -74,11 +74,7 @@ class DataFountain529SentaDataProcessor(object):
         bank_entity_path = os.path.join(RESOURCE_PATH, "entity/bank.txt")
         nlp_da = NlpDA(
             random_word_options={"base_file": bank_entity_path, "create_num": 2, "change_rate": 0.3},
-            similar_word_options={"create_num": 2, "change_rate": 0.3},
-            # homophone_options={"create_num": 2, "change_rate": 0.3},
             random_delete_char_options={"create_num": 2, "change_rate": 0.3},
-            # char_position_exchange_options={"create_num": 2, "change_rate": 0.3, "char_gram": 2},
-            # equivalent_char_options={"create_num": 2, "change_rate": 0.3}
         )
 
         # 训练数据
