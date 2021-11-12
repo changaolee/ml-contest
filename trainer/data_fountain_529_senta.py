@@ -156,7 +156,7 @@ class DataFountain529SentaTrainer(object):
                 self.lr_scheduler.step()
                 self.optimizer.clear_grad()
 
-                if global_step % 30 == 0 or global_step == self.num_training_steps:
+                if global_step % 100 == 0 or global_step == self.num_training_steps:
                     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
                     mkdir_if_not_exist(save_dir)
 
