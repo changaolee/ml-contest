@@ -106,12 +106,15 @@ class DataFountain529SentaTrainer(object):
 
         # 交叉熵损失函数
         self.criterion = paddle.nn.loss.CrossEntropyLoss()
+        self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
 
         # # Focal Loss
         # self.criterion = FocalLoss(self.config.num_classes, alpha=self.config.label_dist, gamma=2)
+        # self.eval_criterion = FocalLoss(self.config.num_classes, alpha=self.config.label_dist, gamma=2)
 
         # kappa 评价指标
         self.metric = Kappa(self.config.num_classes)
+        self.eval_metric = Kappa(self.config.num_classes)
 
     def train(self):
         # 开启训练
@@ -175,21 +178,21 @@ class DataFountain529SentaTrainer(object):
     @paddle.no_grad()
     def evaluate(self, global_step):
         self.model.eval()
-        self.metric.reset()
+        self.eval_metric.reset()
         losses, kappa = [], 0.0
         for batch in self.dev_data_loader:
             input_ids, token_type_ids, labels = batch
             logits = self.model(input_ids, token_type_ids)
-            loss = self.criterion(logits, labels)
+            loss = self.eval_criterion(logits, labels)
             losses.append(loss.numpy())
             probs = F.softmax(logits, axis=1)
             preds = paddle.argmax(probs, axis=1, keepdim=True)
-            self.metric.update(preds, labels)
-            kappa = self.metric.accumulate()
+            self.eval_metric.update(preds, labels)
+            kappa = self.eval_metric.accumulate()
         self.logger.info("「%d/%d」eval loss: %.5f, kappa: %.5f"
                          % (self.fold, self.total_fold, float(np.mean(losses)), kappa))
         self.model.train()
-        self.metric.reset()
+        self.eval_metric.reset()
 
         with LogWriter(logdir=self.vis_dir) as writer:
             writer.add_scalar(tag="kappa_dev", step=global_step, value=kappa)

@@ -86,7 +86,9 @@ class DataFountain529SentaDataProcessor(object):
 
         # 数据增强对象
         nlp_da = NlpDA(
-            random_word_options={"base_file": bank_entity_path, "create_num": 2, "change_rate": 0.3},
+            # random_word_options={"base_file": bank_entity_path, "create_num": 2, "change_rate": 0.3},
+            # similar_word_options={"create_num": 2, "change_rate": 0.3},
+            # random_delete_char_options={"create_num": 2, "change_rate": 0.1},
             translate_options={"domain": "finance", "trans_path": trans_path, "trans_cache_file": trans_cache_path}
         )
 
