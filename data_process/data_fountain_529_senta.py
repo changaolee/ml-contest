@@ -86,7 +86,7 @@ class DataFountain529SentaDataProcessor(object):
 
         # 数据增强对象
         nlp_da = NlpDA(
-            # random_word_options={"base_file": bank_entity_path, "create_num": 2, "change_rate": 0.3},
+            random_word_options={"base_file": bank_entity_path, "create_num": 2, "change_rate": 0.3},
             # similar_word_options={"create_num": 2, "change_rate": 0.3},
             # random_delete_char_options={"create_num": 2, "change_rate": 0.1},
             # translate_options={"domain": "finance", "trans_path": trans_path, "trans_cache_file": trans_cache_path}
@@ -100,8 +100,11 @@ class DataFountain529SentaDataProcessor(object):
 
             for idx, line in train_df.iterrows():
                 _id, text, label = line.get("id", ""), line.get("text", ""), line.get("class", "")
-                for da_text in nlp_da.generate(text):
-                    train_writer.writerow([_id, da_text, label])
+                if str(label) != "2":
+                    for da_text in nlp_da.generate(text):
+                        train_writer.writerow([_id, da_text, label])
+                else:
+                    train_writer.writerow([_id, text, label])
 
         # 测试数据
         test_df = pd.read_csv(self.test_data_path, encoding="utf-8")

@@ -165,9 +165,15 @@ class DataFountain529SentaTrainer(object):
 
                     # 保存当前模型参数等
                     paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
-                    # paddle.save(self.optimizer.state_dict(), os.path.join(save_dir, "opt.optparams"))
-                    # # 保存 tokenizer 的词表等
-                    # self.tokenizer.save_pretrained(save_dir)
+
+            save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
+            mkdir_if_not_exist(save_dir)
+
+            # 评估当前训练的模型
+            self.evaluate(global_step=global_step)
+
+            # 保存当前模型参数等
+            paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len=512):
