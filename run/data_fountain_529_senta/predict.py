@@ -1,4 +1,5 @@
-from paddlenlp.transformers import BertTokenizer
+from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
+from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from model.data_fountain_529_senta import DataFountain529SentaBertBaselineModel
@@ -22,15 +23,15 @@ def predict():
     k_fold_result = []
     k_fold_models = {
         1: "model_400",
-        2: "model_300",
-        3: "model_400",
-        4: "model_300",
-        5: "model_530",
-        6: "model_500",
-        7: "model_530",
-        8: "model_200",
-        9: "model_200",
-        10: "model_200"
+        2: "model_400",
+        3: "model_424",
+        4: "model_400",
+        5: "model_424",
+        6: "model_424",
+        7: "model_300",
+        8: "model_424",
+        9: "model_400",
+        10: "model_424"
     }
     for fold, model_path in k_fold_models.items():
         # 获取测试集
@@ -102,8 +103,11 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     model, tokenizer = None, None
     logger = config.logger
     if model_name == "bert_baseline":
-        model = DataFountain529SentaBertBaselineModel.from_pretrained("bert-base-chinese", config=config)
+        model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    elif model_name == "skep_baseline":
+        model = SkepForSequenceClassification.from_pretrained("skep_ernie_1.0_large_ch", num_classes=config.num_classes)
+        tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
     else:
         logger.error("load model error: {}.".format(model_name))
     return model, tokenizer
