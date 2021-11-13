@@ -2,7 +2,7 @@ from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
 from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
-from model.data_fountain_529_senta import DataFountain529SentaBertBaselineModel
+from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
 from infer.data_fountain_529_senta import DataFountain529SentaInfer
 from utils.config_utils import get_config, CONFIG_PATH
 from utils.utils import mkdir_if_not_exist
@@ -104,6 +104,9 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     logger = config.logger
     if model_name == "bert_baseline":
         model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
+        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    elif model_name == "bert_hidden_fusion":
+        model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     elif model_name == "skep_baseline":
         model = SkepForSequenceClassification.from_pretrained("skep_ernie_1.0_large_ch", num_classes=config.num_classes)
