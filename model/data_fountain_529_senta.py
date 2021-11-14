@@ -51,14 +51,9 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
         all_layer_cls_embedding = stacked_encoder_outputs[:, :, 0, :]
         weighted_cls = (self.layer_weights * all_layer_cls_embedding).sum(axis=0) / self.layer_weights.sum()
 
-        seq_embeddings = encoder_outputs[-1][:, 1:, :, :]
-        mean_seq_embedding = seq_embeddings.mean(axis=0)
-        max_seq_embedding = seq_embeddings.max(axis=0)
-
-        print(encoder_outputs[-1].shape)
-        print(seq_embeddings.shape)
-        print(mean_seq_embedding.shape)
-        print(max_seq_embedding.shape)
+        seq_embeddings = encoder_outputs[-1][:, 1:]
+        mean_seq_embedding = seq_embeddings.mean(axis=1)
+        max_seq_embedding = seq_embeddings.max(axis=1)
 
         concat_embedding = paddle.fluid.layers.concat([weighted_cls, mean_seq_embedding, max_seq_embedding], axis=-1)
         pooled_output = self.dropout(concat_embedding)
