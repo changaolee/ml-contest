@@ -24,16 +24,16 @@ def predict():
 
     k_fold_result = []
     k_fold_models = {
-        1: "",
-        2: "",
-        3: "",
-        4: "",
-        5: "",
-        6: "",
-        7: "",
-        8: "",
-        9: "",
-        10: ""
+        1: "model_318",
+        2: "model_200",
+        3: "model_200",
+        4: "model_212",
+        5: "model_212",
+        6: "model_212",
+        7: "model_200",
+        8: "model_212",
+        9: "model_318",
+        10: "model_212"
     }
     for fold, model_path in k_fold_models.items():
         # 获取测试集
