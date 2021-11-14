@@ -9,7 +9,7 @@ class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
     """
 
     def __init__(self, bert, config: Bunch):
-        super().__init__()
+        super(DataFountain529SentaBertHiddenFusionModel, self).__init__()
         self.config = config
         self.bert = bert
         self.dropout = paddle.nn.Dropout(self.config.hidden_dropout_prob)
@@ -35,7 +35,7 @@ class DataFountain529SentaRobertaHiddenFusionModel(RobertaPretrainedModel):
     """
 
     def __init__(self, roberta, config: Bunch):
-        super().__init__()
+        super(DataFountain529SentaRobertaHiddenFusionModel, self).__init__()
         self.config = config
         self.roberta = roberta
         self.dropout = paddle.nn.Dropout(self.config.hidden_dropout_prob)
