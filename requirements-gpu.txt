@@ -124,7 +124,7 @@ opencv-python==4.1.1.26
 openpyxl==3.0.5
 packaging==20.9
 paddlehub==2.0.4
-paddlenlp==2.0.7
+paddlenlp==2.1.1
 paddlepaddle-gpu==2.1.2.post101
 pamela==1.0.0
 pandas==1.1.5
