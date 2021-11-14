@@ -1,6 +1,8 @@
 from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
 from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
+from paddlenlp.transformers import RobertaTokenizer
 from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
+from model.data_fountain_529_senta import DataFountain529SentaRobertaHiddenFusionModel
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from trainer.data_fountain_529_senta import DataFountain529SentaTrainer
@@ -48,6 +50,9 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     elif model_name == "bert_hidden_fusion":
         model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    elif model_name == "roberta_hidden_fusion":
+        model = DataFountain529SentaRobertaHiddenFusionModel.from_pretrained("roberta-wwm-ext", config=config)
+        tokenizer = RobertaTokenizer.from_pretrained("roberta-wwm-ext")
     elif model_name == "skep_baseline":
         model = SkepForSequenceClassification.from_pretrained("skep_ernie_1.0_large_ch", num_classes=config.num_classes)
         tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
