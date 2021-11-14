@@ -1,4 +1,4 @@
-from .sdk.baidu_translate import BaiduTranslate
+from sdk.baidu_translate import BaiduTranslate
 import nlpcda
 
 
