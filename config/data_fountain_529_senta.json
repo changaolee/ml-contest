@@ -1,6 +1,6 @@
 {
   "exp_name": "data_fountain_529_senta",
-  "model_name": "bert_cls_seq_mean_max",
+  "model_name": "bert_base",
 
   "train_filename": "train_data_public.csv",
   "test_filename": "test_public.csv",
@@ -14,7 +14,7 @@
   "hidden_size": 768,
   "num_classes": 3,
 
-  "batch_size": 64,
-  "train_epochs": 3,
+  "batch_size": 128,
+  "train_epochs": 5,
   "learning_rate": 2e-5
 }

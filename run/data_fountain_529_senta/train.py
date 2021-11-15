@@ -45,7 +45,7 @@ def train():
 def get_model_and_tokenizer(model_name: str, config: Bunch):
     model, tokenizer = None, None
     logger = config.logger
-    if model_name == "bert_baseline":
+    if model_name == "bert_base":
         model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     elif model_name == "bert_hidden_fusion":
@@ -57,7 +57,7 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     elif model_name == "roberta_hidden_fusion":
         model = DataFountain529SentaRobertaHiddenFusionModel.from_pretrained("roberta-wwm-ext", config=config)
         tokenizer = RobertaTokenizer.from_pretrained("roberta-wwm-ext")
-    elif model_name == "skep_baseline":
+    elif model_name == "skep_base":
         model = SkepForSequenceClassification.from_pretrained("skep_ernie_1.0_large_ch", num_classes=config.num_classes)
         tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
     else:

@@ -156,7 +156,7 @@ class DataFountain529SentaTrainer(object):
                 self.lr_scheduler.step()
                 self.optimizer.clear_grad()
 
-                if global_step % 100 == 0 or global_step == self.num_training_steps:
+                if global_step % 10 == 0 or global_step == self.num_training_steps:
                     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
                     mkdir_if_not_exist(save_dir)
 
@@ -165,15 +165,6 @@ class DataFountain529SentaTrainer(object):
 
                     # 保存当前模型参数等
                     paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
-
-            save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
-            mkdir_if_not_exist(save_dir)
-
-            # 评估当前训练的模型
-            self.evaluate(global_step=global_step)
-
-            # 保存当前模型参数等
-            paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len=512):
