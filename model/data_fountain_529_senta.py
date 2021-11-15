@@ -39,7 +39,7 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
         self.config = config
         self.bert = bert
         self.dropout = paddle.nn.Dropout(self.config.hidden_dropout_prob)
-        self.classifier = paddle.nn.layer.Linear(self.config.hidden_size, self.config.num_classes)
+        self.classifier = paddle.nn.layer.Linear(3 * 768, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(12, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
 
