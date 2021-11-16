@@ -1,6 +1,6 @@
 from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
 from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
-from paddlenlp.transformers import RobertaTokenizer
+from paddlenlp.transformers import RobertaTokenizer, RobertaForSequenceClassification
 from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
 from model.data_fountain_529_senta import DataFountain529SentaBertClsSeqMeanMaxModel
 from model.data_fountain_529_senta import DataFountain529SentaRobertaHiddenFusionModel
@@ -114,6 +114,9 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     elif model_name == "bert_cls_seq_mean_max":
         model = DataFountain529SentaBertClsSeqMeanMaxModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    elif model_name == "roberta_base":
+        model = RobertaForSequenceClassification.from_pretrained("roberta-wwm-ext", config=config)
+        tokenizer = RobertaTokenizer.from_pretrained("roberta-wwm-ext")
     elif model_name == "roberta_hidden_fusion":
         model = DataFountain529SentaRobertaHiddenFusionModel.from_pretrained("roberta-wwm-ext", config=config)
         tokenizer = RobertaTokenizer.from_pretrained("roberta-wwm-ext")
