@@ -5,7 +5,7 @@
   "train_filename": "train_data_public.csv",
   "test_filename": "test_public.csv",
 
-  "k_fold": 10,
+  "k_fold": 7,
   "random_state": 2021,
   "dev_prop": 0.2,
 
