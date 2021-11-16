@@ -13,7 +13,7 @@ class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
         self.config = config
         self.bert = bert
         self.dropout = paddle.nn.Dropout(self.config.hidden_dropout_prob)
-        self.classifier = paddle.nn.layer.Linear(self.config.hidden_size, self.config.num_classes)
+        self.classifier = paddle.nn.layer.Linear(768, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(12, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
 
@@ -71,8 +71,8 @@ class DataFountain529SentaSkepHiddenFusionModel(SkepPretrainedModel):
         self.config = config
         self.skep = skep
         self.dropout = paddle.nn.Dropout(self.config.hidden_dropout_prob)
-        self.classifier = paddle.nn.layer.Linear(self.config.hidden_size, self.config.num_classes)
-        self.layer_weights = self.create_parameter(shape=(12, 1, 1),
+        self.classifier = paddle.nn.layer.Linear(1024, self.config.num_classes)
+        self.layer_weights = self.create_parameter(shape=(24, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
 
     def forward(self, input_ids, token_type_ids):
