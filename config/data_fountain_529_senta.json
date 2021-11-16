@@ -5,7 +5,7 @@
   "train_filename": "train_data_public.csv",
   "test_filename": "test_public.csv",
 
-  "k_fold": 7,
+  "k_fold": 10,
   "random_state": 2021,
   "dev_prop": 0.2,
 
@@ -15,6 +15,6 @@
   "num_classes": 3,
 
   "batch_size": 64,
-  "train_epochs": 5,
+  "train_epochs": 4,
   "learning_rate": 2e-5
 }
