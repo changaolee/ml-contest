@@ -82,8 +82,14 @@ class DataFountain529SentaTrainer(object):
         mkdir_if_not_exist(self.ckpt_dir)
 
         # 可视化日志的文件夹
-        self.vis_dir = os.path.join(self.config.vis_dir, self.config.model_name, "fold_{}".format(self.fold))
-        mkdir_if_not_exist(self.vis_dir)
+        self.train_vis_dir = os.path.join(
+            self.config.vis_dir, self.config.model_name, "fold_{}/train".format(self.fold)
+        )
+        self.dev_vis_dir = os.path.join(
+            self.config.vis_dir, self.config.model_name, "fold_{}/dev".format(self.fold)
+        )
+        mkdir_if_not_exist(self.train_vis_dir)
+        mkdir_if_not_exist(self.dev_vis_dir)
 
         # 训练所需要的总 step 数
         self.num_training_steps = len(self.train_data_loader) * self.epochs
@@ -121,54 +127,55 @@ class DataFountain529SentaTrainer(object):
         global_step = 0
         tic_train = time.time()
 
-        with LogWriter(logdir=self.vis_dir) as writer:
-            for epoch in range(1, self.epochs + 1):
-                for step, batch in enumerate(self.train_data_loader, start=1):
-                    input_ids, token_type_ids, labels = batch
+        with LogWriter(logdir=self.train_vis_dir) as train_writer:
+            with LogWriter(logdir=self.dev_vis_dir) as dev_writer:
+                for epoch in range(1, self.epochs + 1):
+                    for step, batch in enumerate(self.train_data_loader, start=1):
+                        input_ids, token_type_ids, labels = batch
 
-                    # 喂数据给 model
-                    logits = self.model(input_ids, token_type_ids)
+                        # 喂数据给 model
+                        logits = self.model(input_ids, token_type_ids)
 
-                    # 计算损失函数值
-                    loss = self.criterion(logits, labels)
+                        # 计算损失函数值
+                        loss = self.criterion(logits, labels)
 
-                    # 预测分类概率值
-                    probs = F.softmax(logits, axis=1)
-                    preds = paddle.argmax(probs, axis=1, keepdim=True)
+                        # 预测分类概率值
+                        probs = F.softmax(logits, axis=1)
+                        preds = paddle.argmax(probs, axis=1, keepdim=True)
 
-                    # 计算 kappa
-                    self.metric.update(preds, labels)
-                    kappa = self.metric.accumulate()
+                        # 计算 kappa
+                        self.metric.update(preds, labels)
+                        kappa = self.metric.accumulate()
 
-                    global_step += 1
-                    if global_step % 10 == 0:
-                        self.logger.info(
-                            "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, speed: %.2f step/s"
-                            % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa,
-                               10 / (time.time() - tic_train)))
-                        tic_train = time.time()
+                        global_step += 1
+                        if global_step % 10 == 0:
+                            self.logger.info(
+                                "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, speed: %.2f step/s"
+                                % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa,
+                                   10 / (time.time() - tic_train)))
+                            tic_train = time.time()
 
-                        writer.add_scalar(tag="kappa_train", step=global_step, value=kappa)
-                        writer.add_scalar(tag="loss_train", step=global_step, value=loss)
+                            train_writer.add_scalar(tag="kappa", step=global_step, value=kappa)
+                            train_writer.add_scalar(tag="loss", step=global_step, value=loss)
 
-                    # 反向梯度回传，更新参数
-                    loss.backward()
-                    self.optimizer.step()
-                    self.lr_scheduler.step()
-                    self.optimizer.clear_grad()
+                        # 反向梯度回传，更新参数
+                        loss.backward()
+                        self.optimizer.step()
+                        self.lr_scheduler.step()
+                        self.optimizer.clear_grad()
 
-                    if global_step % 10 == 0 or global_step == self.num_training_steps:
-                        save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
-                        mkdir_if_not_exist(save_dir)
+                        if global_step % 10 == 0 or global_step == self.num_training_steps:
+                            save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
+                            mkdir_if_not_exist(save_dir)
 
-                        # 评估当前训练的模型
-                        loss_dev, kappa_dev = self.evaluate()
+                            # 评估当前训练的模型
+                            loss_dev, kappa_dev = self.evaluate()
 
-                        writer.add_scalar(tag="kappa_dev", step=global_step, value=kappa_dev)
-                        writer.add_scalar(tag="loss_dev", step=global_step, value=loss_dev)
+                            dev_writer.add_scalar(tag="kappa", step=global_step, value=kappa_dev)
+                            dev_writer.add_scalar(tag="loss", step=global_step, value=loss_dev)
 
-                        # 保存当前模型参数等
-                        paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
+                            # 保存当前模型参数等
+                            paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len=512):
