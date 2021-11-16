@@ -1,9 +1,8 @@
 from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
 from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
-from paddlenlp.transformers import RobertaTokenizer, RobertaForSequenceClassification
 from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
 from model.data_fountain_529_senta import DataFountain529SentaBertClsSeqMeanMaxModel
-from model.data_fountain_529_senta import DataFountain529SentaRobertaHiddenFusionModel
+from model.data_fountain_529_senta import DataFountain529SentaSkepHiddenFusionModel
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from infer.data_fountain_529_senta import DataFountain529SentaInfer
@@ -25,16 +24,16 @@ def predict():
 
     k_fold_result = []
     k_fold_models = {
-        1: "",
-        2: "",
-        3: "",
-        4: "",
-        5: "",
-        6: "",
-        7: "",
-        8: "",
-        9: "",
-        10: ""
+        1: "model_210",
+        2: "model_210",
+        3: "model_200",
+        4: "model_230",
+        5: "model_220",
+        6: "model_200",
+        7: "model_220",
+        8: "model_210",
+        9: "model_230",
+        10: "model_260"
     }
     for fold, model_path in k_fold_models.items():
         # 获取测试集
@@ -114,14 +113,11 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     elif model_name == "bert_cls_seq_mean_max":
         model = DataFountain529SentaBertClsSeqMeanMaxModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
-    elif model_name == "roberta_base":
-        model = RobertaForSequenceClassification.from_pretrained("roberta-wwm-ext", config=config)
-        tokenizer = RobertaTokenizer.from_pretrained("roberta-wwm-ext")
-    elif model_name == "roberta_hidden_fusion":
-        model = DataFountain529SentaRobertaHiddenFusionModel.from_pretrained("roberta-wwm-ext", config=config)
-        tokenizer = RobertaTokenizer.from_pretrained("roberta-wwm-ext")
     elif model_name == "skep_base":
         model = SkepForSequenceClassification.from_pretrained("skep_ernie_1.0_large_ch", num_classes=config.num_classes)
+        tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
+    elif model_name == "skep_hidden_fusion":
+        model = DataFountain529SentaSkepHiddenFusionModel.from_pretrained("skep_ernie_1.0_large_ch", config=config)
         tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
     else:
         logger.error("load model error: {}.".format(model_name))

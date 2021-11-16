@@ -80,3 +80,12 @@
 }
 ```
 
+### packages 修改记录
+
+#### 1. RobertaModel 的 forward 方法增加 output_hidden_states 参数
+
+文件路径：`paddlenlp/transformers/roberta/modeling.py`
+
+#### 2. SkepModel 的 forward 方法增加 output_hidden_states 参数
+
+文件路径：`paddlenlp/transformers/skep/modeling.py`

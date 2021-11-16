@@ -276,7 +276,8 @@ class SkepModel(SkepPretrainedModel):
                 input_ids,
                 token_type_ids=None,
                 position_ids=None,
-                attention_mask=None):
+                attention_mask=None,
+                output_hidden_states=False):
         r"""
         The SkepModel forward method, overrides the `__call__()` special method.
 
@@ -311,6 +312,7 @@ class SkepModel(SkepPretrainedModel):
                 For example, its shape can be  [batch_size, sequence_length], [batch_size, sequence_length, sequence_length],
                 [batch_size, num_attention_heads, sequence_length, sequence_length].
                 Defaults to `None`, which means nothing needed to be prevented attention to.
+            output_hidden_states (Bool)
 
         Returns:
             tuple: Returns tuple (`sequence_output`, `pooled_output`).
@@ -349,10 +351,20 @@ class SkepModel(SkepPretrainedModel):
             input_ids=input_ids,
             position_ids=position_ids,
             token_type_ids=token_type_ids)
-        encoder_outputs = self.encoder(embedding_output, attention_mask)
-        sequence_output = encoder_outputs
-        pooled_output = self.pooler(sequence_output)
-        return sequence_output, pooled_output
+        if output_hidden_states:
+            output = embedding_output
+            encoder_outputs = []
+            for mod in self.encoder.layers:
+                output = mod(output, src_mask=attention_mask)
+                encoder_outputs.append(output)
+            if self.encoder.norm is not None:
+                encoder_outputs[-1] = self.encoder.norm(encoder_outputs[-1])
+            pooled_output = self.pooler(encoder_outputs[-1])
+            return encoder_outputs, pooled_output
+        else:
+            sequence_output = self.encoder(embedding_output, attention_mask)
+            pooled_output = self.pooler(sequence_output)
+            return sequence_output, pooled_output
 
 
 class SkepForSequenceClassification(SkepPretrainedModel):
