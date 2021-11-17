@@ -1,28 +1,19 @@
 import paddle
-import paddle.nn.functional as F
 import numpy as np
 
 
 class FocalLoss(paddle.nn.Layer):
-    def __init__(self, num_classes, alpha, gamma=2):
+    def __init__(self, alpha=0.5, gamma=2, num_classes=3, weight=None, ignore_index=-100):
         super().__init__()
-        self.num_classes = num_classes
-        self.alpha = paddle.to_tensor(alpha, dtype=np.float32)
-        self.gamma = paddle.to_tensor(gamma, dtype=np.float32)
+        self.alpha = alpha
+        self.gamma = gamma
+        self.weight = paddle.to_tensor(np.array(weight)) \
+            if weight else paddle.to_tensor(np.array([1.] * num_classes))
+        self.ce_fn = paddle.nn.CrossEntropyLoss(
+            weight=self.weight, soft_label=False, ignore_index=ignore_index)
 
-    def forward(self, logits, labels):
-        probs = F.softmax(logits, axis=1)
-        labels = F.one_hot(labels.flatten(), self.num_classes)
-
-        log_pt = labels * paddle.fluid.layers.log(probs)
-        log_pt = paddle.fluid.layers.reduce_sum(log_pt, dim=-1)
-
-        weight = -1.0 * labels * paddle.fluid.layers.pow((1.0 - probs), self.gamma)
-        weight = paddle.fluid.layers.reduce_sum(weight, dim=-1)
-
-        alpha = paddle.multiply(self.alpha, labels)
-        alpha = paddle.fluid.layers.reduce_sum(alpha, dim=-1)
-
-        loss = alpha * weight * log_pt
-
-        return loss.sum()
+    def forward(self, preds, labels):
+        logpt = -self.ce_fn(preds, labels)
+        pt = paddle.exp(logpt)
+        loss = -((1 - pt) ** self.gamma) * self.alpha * logpt
+        return loss
