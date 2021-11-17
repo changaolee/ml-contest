@@ -110,13 +110,14 @@ class DataFountain529SentaTrainer(object):
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
-        # 交叉熵损失函数
-        self.criterion = paddle.nn.loss.CrossEntropyLoss()
-        self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
+        # # 交叉熵损失函数
+        # self.criterion = paddle.nn.loss.CrossEntropyLoss()
+        # self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
 
-        # # Focal Loss
-        # self.criterion = FocalLoss(self.config.num_classes, alpha=self.config.label_dist, gamma=2)
-        # self.eval_criterion = FocalLoss(self.config.num_classes, alpha=self.config.label_dist, gamma=2)
+        # Focal Loss
+        alpha = [1 - prop for prop in self.config.label_dist]
+        self.criterion = FocalLoss(self.config.num_classes, alpha=alpha, gamma=2)
+        self.eval_criterion = FocalLoss(self.config.num_classes, alpha=alpha, gamma=2)
 
         # kappa 评价指标
         self.metric = Kappa(self.config.num_classes)
