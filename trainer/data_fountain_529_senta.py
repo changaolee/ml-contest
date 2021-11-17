@@ -116,6 +116,7 @@ class DataFountain529SentaTrainer(object):
 
         # Focal Loss
         weight = [(1 - prop) * 10 for prop in self.config.label_dist]
+        weight = None  # 默认值效果会更好
         self.criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)
         self.eval_criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)
 
