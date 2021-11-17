@@ -166,6 +166,7 @@ class DataFountain529SentaTrainer(object):
                             tic_train = time.time()
 
                             train_writer.add_scalar(tag="kappa", step=global_step, value=kappa)
+                            train_writer.add_scalar(tag="acc", step=global_step, value=acc)
                             train_writer.add_scalar(tag="loss", step=global_step, value=loss)
 
                         # 反向梯度回传，更新参数
@@ -179,9 +180,10 @@ class DataFountain529SentaTrainer(object):
                             mkdir_if_not_exist(save_dir)
 
                             # 评估当前训练的模型
-                            loss_dev, kappa_dev = self.evaluate()
+                            loss_dev, kappa_dev, acc_dev = self.evaluate()
 
                             dev_writer.add_scalar(tag="kappa", step=global_step, value=kappa_dev)
+                            dev_writer.add_scalar(tag="acc", step=global_step, value=acc_dev)
                             dev_writer.add_scalar(tag="loss", step=global_step, value=loss_dev)
 
                             # 保存当前模型参数等
@@ -222,4 +224,4 @@ class DataFountain529SentaTrainer(object):
         self.eval_metric.reset()
         self.eval_acc_metric.reset()
 
-        return float(np.mean(losses)), kappa
+        return float(np.mean(losses)), kappa, acc
