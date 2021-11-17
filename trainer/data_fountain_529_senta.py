@@ -115,13 +115,17 @@ class DataFountain529SentaTrainer(object):
         # self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
 
         # Focal Loss
-        weight = [1 - prop for prop in self.config.label_dist]
+        weight = [(1 - prop) * 10 for prop in self.config.label_dist]
         self.criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)
         self.eval_criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)
 
-        # kappa 评价指标
+        # Kappa 评价指标
         self.metric = Kappa(self.config.num_classes)
         self.eval_metric = Kappa(self.config.num_classes)
+
+        # Acc 评价指标
+        self.acc_metric = paddle.metric.Accuracy()
+        self.eval_acc_metric = paddle.metric.Accuracy()
 
     def train(self):
         # 开启训练
@@ -148,11 +152,16 @@ class DataFountain529SentaTrainer(object):
                         self.metric.update(preds, labels)
                         kappa = self.metric.accumulate()
 
+                        # 计算 acc
+                        correct = self.acc_metric.compute(probs, labels)
+                        self.acc_metric.update(correct)
+                        acc = self.acc_metric.accumulate()
+
                         global_step += 1
                         if global_step % 10 == 0:
                             self.logger.info(
-                                "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, speed: %.2f step/s"
-                                % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa,
+                                "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, acc: %.5f, speed: %.2f step/s"
+                                % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa, acc,
                                    10 / (time.time() - tic_train)))
                             tic_train = time.time()
 
@@ -188,19 +197,29 @@ class DataFountain529SentaTrainer(object):
     def evaluate(self):
         self.model.eval()
         self.eval_metric.reset()
-        losses, kappa = [], 0.0
+        self.eval_acc_metric.reset()
+        losses, kappa, acc = [], 0.0, 0.0
         for batch in self.dev_data_loader:
             input_ids, token_type_ids, labels = batch
             logits = self.model(input_ids, token_type_ids)
+
             loss = self.eval_criterion(logits, labels)
             losses.append(loss.numpy())
+
             probs = F.softmax(logits, axis=1)
             preds = paddle.argmax(probs, axis=1, keepdim=True)
+
             self.eval_metric.update(preds, labels)
             kappa = self.eval_metric.accumulate()
-        self.logger.info("「%d/%d」eval loss: %.5f, kappa: %.5f"
-                         % (self.fold, self.total_fold, float(np.mean(losses)), kappa))
+
+            correct = self.eval_acc_metric.compute(probs, labels)
+            self.eval_acc_metric.update(correct)
+            acc = self.eval_acc_metric.accumulate()
+
+        self.logger.info("「%d/%d」eval loss: %.5f, kappa: %.5f, acc: %.5f"
+                         % (self.fold, self.total_fold, float(np.mean(losses)), kappa, acc))
         self.model.train()
         self.eval_metric.reset()
+        self.eval_acc_metric.reset()
 
         return float(np.mean(losses)), kappa
