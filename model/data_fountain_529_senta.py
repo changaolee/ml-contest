@@ -16,6 +16,7 @@ class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
         self.classifier = paddle.nn.layer.Linear(768, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(12, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
+        self.apply(self.init_weights)
 
     def forward(self, input_ids, token_type_ids):
         encoder_outputs, _ = self.bert(input_ids,
@@ -42,6 +43,7 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
         self.classifier = paddle.nn.layer.Linear(3 * 768, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(12, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
+        self.apply(self.init_weights)
 
     def forward(self, input_ids, token_type_ids):
         encoder_outputs, _ = self.bert(input_ids,
@@ -74,6 +76,7 @@ class DataFountain529SentaSkepHiddenFusionModel(SkepPretrainedModel):
         self.classifier = paddle.nn.layer.Linear(1024, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(24, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
+        self.apply(self.init_weights)
 
     def forward(self, input_ids, token_type_ids):
         encoder_outputs, _ = self.skep(input_ids,
@@ -100,6 +103,7 @@ class DataFountain529SentaSkepClsSeqMeanMaxModel(SkepPretrainedModel):
         self.classifier = paddle.nn.layer.Linear(3 * 1024, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(24, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
+        self.apply(self.init_weights)
 
     def forward(self, input_ids, token_type_ids):
         encoder_outputs, _ = self.skep(input_ids,
