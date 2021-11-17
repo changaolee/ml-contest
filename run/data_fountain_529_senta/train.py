@@ -3,6 +3,7 @@ from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
 from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
 from model.data_fountain_529_senta import DataFountain529SentaBertClsSeqMeanMaxModel
 from model.data_fountain_529_senta import DataFountain529SentaSkepHiddenFusionModel
+from model.data_fountain_529_senta import DataFountain529SentaSkepClsSeqMeanMaxModel
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from trainer.data_fountain_529_senta import DataFountain529SentaTrainer
@@ -58,6 +59,9 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
         tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
     elif model_name == "skep_hidden_fusion":
         model = DataFountain529SentaSkepHiddenFusionModel.from_pretrained("skep_ernie_1.0_large_ch", config=config)
+        tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
+    elif model_name == "skep_cls_seq_mean_max":
+        model = DataFountain529SentaSkepClsSeqMeanMaxModel.from_pretrained("skep_ernie_1.0_large_ch", config=config)
         tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
     else:
         logger.error("load model error: {}.".format(model_name))
