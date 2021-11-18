@@ -25,14 +25,16 @@ class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
         stacked_encoder_outputs = paddle.stack(encoder_outputs, axis=0)
         all_layer_cls_embedding = stacked_encoder_outputs[:, :, 0, :]
         weighted_average = (self.layer_weights * all_layer_cls_embedding).sum(axis=0) / self.layer_weights.sum()
+
         pooled_output = self.dropout(weighted_average)
         logits = self.classifier(pooled_output)
+
         return logits
 
 
 class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
     """
-    Bert：融合后的 CLS 拼接 Seq Mean、Max
+    Bert：pooled_output 拼接 Seq Mean、Max
     """
 
     def __init__(self, bert, config: Bunch):
@@ -46,20 +48,17 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
         self.apply(self.init_weights)
 
     def forward(self, input_ids, token_type_ids):
-        encoder_outputs, _ = self.bert(input_ids,
-                                       token_type_ids=token_type_ids,
-                                       output_hidden_states=True)
-        stacked_encoder_outputs = paddle.stack(encoder_outputs, axis=0)
-        all_layer_cls_embedding = stacked_encoder_outputs[:, :, 0, :]
-        weighted_cls = (self.layer_weights * all_layer_cls_embedding).sum(axis=0) / self.layer_weights.sum()
-
+        encoder_outputs, pooled_output = self.bert(input_ids,
+                                                   token_type_ids=token_type_ids,
+                                                   output_hidden_states=True)
         seq_embeddings = encoder_outputs[-1][:, 1:]
         mean_seq_embedding = seq_embeddings.mean(axis=1)
         max_seq_embedding = seq_embeddings.max(axis=1)
 
-        concat_embedding = paddle.fluid.layers.concat([weighted_cls, mean_seq_embedding, max_seq_embedding], axis=-1)
+        concat_embedding = paddle.fluid.layers.concat([pooled_output, mean_seq_embedding, max_seq_embedding], axis=-1)
         pooled_output = self.dropout(concat_embedding)
         logits = self.classifier(pooled_output)
+
         return logits
 
 
@@ -85,14 +84,16 @@ class DataFountain529SentaSkepHiddenFusionModel(SkepPretrainedModel):
         stacked_encoder_outputs = paddle.stack(encoder_outputs, axis=0)
         all_layer_cls_embedding = stacked_encoder_outputs[:, :, 0, :]
         weighted_average = (self.layer_weights * all_layer_cls_embedding).sum(axis=0) / self.layer_weights.sum()
+
         pooled_output = self.dropout(weighted_average)
         logits = self.classifier(pooled_output)
+
         return logits
 
 
 class DataFountain529SentaSkepClsSeqMeanMaxModel(SkepPretrainedModel):
     """
-    Skep：融合后的 CLS 拼接 Seq Mean、Max
+    Skep：pooled_output 拼接 Seq Mean、Max
     """
 
     def __init__(self, skep, config: Bunch):
@@ -106,18 +107,15 @@ class DataFountain529SentaSkepClsSeqMeanMaxModel(SkepPretrainedModel):
         self.apply(self.init_weights)
 
     def forward(self, input_ids, token_type_ids):
-        encoder_outputs, _ = self.skep(input_ids,
-                                       token_type_ids=token_type_ids,
-                                       output_hidden_states=True)
-        stacked_encoder_outputs = paddle.stack(encoder_outputs, axis=0)
-        all_layer_cls_embedding = stacked_encoder_outputs[:, :, 0, :]
-        weighted_cls = (self.layer_weights * all_layer_cls_embedding).sum(axis=0) / self.layer_weights.sum()
-
+        encoder_outputs, pooled_output = self.skep(input_ids,
+                                                   token_type_ids=token_type_ids,
+                                                   output_hidden_states=True)
         seq_embeddings = encoder_outputs[-1][:, 1:]
         mean_seq_embedding = seq_embeddings.mean(axis=1)
         max_seq_embedding = seq_embeddings.max(axis=1)
 
-        concat_embedding = paddle.fluid.layers.concat([weighted_cls, mean_seq_embedding, max_seq_embedding], axis=-1)
+        concat_embedding = paddle.fluid.layers.concat([pooled_output, mean_seq_embedding, max_seq_embedding], axis=-1)
         pooled_output = self.dropout(concat_embedding)
         logits = self.classifier(pooled_output)
+
         return logits
