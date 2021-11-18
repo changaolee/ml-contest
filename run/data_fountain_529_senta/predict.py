@@ -10,6 +10,7 @@ from infer.data_fountain_529_senta import DataFountain529SentaInfer
 from utils.config_utils import get_config, CONFIG_PATH
 from utils.utils import mkdir_if_not_exist
 from bunch import Bunch
+import numpy as np
 import csv
 import os
 
@@ -69,35 +70,33 @@ def predict():
 def merge_tta_result(tta_result):
     tta = {}
     for record in tta_result:
-        qid, label = record[0][0], record[1]
+        qid, probs = record[0], record[1]
         if qid not in tta:
-            tta[qid] = {"0": 0, "1": 0, "2": 0}
-        tta[qid][label] += 1
-
-    # 按 qid 排序
-    tta = sorted(tta.items(), key=lambda x: x[0])
+            tta[qid] = {'probs': [0.] * 3, 'num': 0}
+        tta[qid]['probs'] = np.sum([tta[qid]['probs'], probs], axis=0)
+        tta[qid]['num'] += 1
 
     result = []
-    for record in tta:
-        qid, labels = record
-        tta_cnt = sum(labels.values())
-        labels = sorted(labels.items(), key=lambda x: x[1], reverse=True)
-        label = labels[0][0] if labels[0][1] > tta_cnt // 2 else "2"
-        result.append([qid, label])
+    for qid, sum_probs in tta.items():
+        probs = np.divide(sum_probs['probs'], sum_probs['num']).tolist()
+        result.append([qid, probs])
     return result
 
 
 def merge_k_fold_result(k_fold_result):
-    k, n = len(k_fold_result), len(k_fold_result[0])
+    merge_result = {}
+    for fold_result in k_fold_result:
+        for line in fold_result:
+            qid, probs = line[0], line[1]
+            if qid not in merge_result:
+                merge_result[qid] = [0.] * 3
+            merge_result[qid] = np.sum([merge_result[qid], probs], axis=0)
+    merge_result = sorted(merge_result.items(), key=lambda x: x[0], reverse=False)
+
     result = []
-    for i in range(n):
-        qid = k_fold_result[0][i][0]
-        labels = {}
-        for j in range(k):
-            label = k_fold_result[j][i][1]
-            labels[label] = labels.get(label, 0) + 1
-        labels = sorted(labels.items(), key=lambda x: x[1], reverse=True)
-        label = labels[0][0] if labels[0][1] > k // 2 else "2"
+    for line in merge_result:
+        qid, probs = line[0], line[1]
+        label = np.argmax(probs)
         result.append([qid, label])
     return result
 

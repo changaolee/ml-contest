@@ -12,7 +12,6 @@ import os
 
 
 class DataFountain529SentaInfer(object):
-    label_map = {0: "0", 1: "1", 2: "2"}
 
     def __init__(self,
                  model: nn.Layer,
@@ -57,20 +56,20 @@ class DataFountain529SentaInfer(object):
         else:
             self.logger.error("Loaded parameters error from {}".format(model_params_path))
 
+    @paddle.no_grad()
     def predict(self):
         result = []
         # 切换 model 模型为评估模式，关闭 dropout 等随机因素
         self.model.eval()
-        for batch in self.test_data_loader:
+        for step, batch in enumerate(self.test_data_loader, start=1):
             input_ids, token_type_ids, qids = batch
             # 喂数据给 model
             logits = self.model(input_ids, token_type_ids)
             # 预测分类
             probs = F.softmax(logits, axis=-1)
-            idx = paddle.argmax(probs, axis=1).numpy().tolist()
-            labels = [self.label_map[i] for i in idx]
-            qids = qids.numpy().tolist()
-            result.extend(zip(qids, labels))
+            qids = qids.flatten().numpy().tolist()
+            probs = probs.numpy().tolist()
+            result.extend(zip(qids, probs))
         return result
 
     @staticmethod
