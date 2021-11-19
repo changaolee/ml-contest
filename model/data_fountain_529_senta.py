@@ -42,7 +42,8 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
         self.config = config
         self.bert = bert
         self.dropout = paddle.nn.Dropout(self.config.hidden_dropout_prob)
-        self.classifier = paddle.nn.layer.Linear(3 * 768, self.config.num_classes)
+        self.pooler = paddle.nn.layer.AdaptiveAvgPool1D(output_size=768)
+        self.classifier = paddle.nn.layer.Linear(768, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(12, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
         self.apply(self.init_weights)
@@ -56,7 +57,8 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
         max_seq_embedding = seq_embeddings.max(axis=1)
 
         concat_embedding = paddle.fluid.layers.concat([pooled_output, mean_seq_embedding, max_seq_embedding], axis=-1)
-        pooled_output = self.dropout(concat_embedding)
+        pooled_output = self.pooler(concat_embedding)
+        pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
 
         return logits
@@ -101,7 +103,8 @@ class DataFountain529SentaSkepClsSeqMeanMaxModel(SkepPretrainedModel):
         self.config = config
         self.skep = skep
         self.dropout = paddle.nn.Dropout(self.config.hidden_dropout_prob)
-        self.classifier = paddle.nn.layer.Linear(3 * 1024, self.config.num_classes)
+        self.pooler = paddle.nn.layer.AdaptiveAvgPool1D(output_size=1024)
+        self.classifier = paddle.nn.layer.Linear(1024, self.config.num_classes)
         self.layer_weights = self.create_parameter(shape=(24, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
         self.apply(self.init_weights)
@@ -115,7 +118,8 @@ class DataFountain529SentaSkepClsSeqMeanMaxModel(SkepPretrainedModel):
         max_seq_embedding = seq_embeddings.max(axis=1)
 
         concat_embedding = paddle.fluid.layers.concat([pooled_output, mean_seq_embedding, max_seq_embedding], axis=-1)
-        pooled_output = self.dropout(concat_embedding)
+        pooled_output = self.pooler(concat_embedding)
+        pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
 
         return logits
