@@ -47,7 +47,8 @@ class DataFountain529SentaInfer(object):
             trans_fn=trans_func)
 
     def _load_model(self):
-        model_params_path = os.path.join(self.config.model_path, "model.pdparams")
+        model_params_path = self.config.model_path if os.path.isfile(self.config.model_path) \
+            else os.path.join(self.config.model_path, "model.pdparams")
         if os.path.isfile(model_params_path):
             # 加载模型参数
             state_dict = paddle.load(model_params_path)
