@@ -4,8 +4,9 @@ import csv
 results = {'bert_base.csv': 0.69339421919,
            'focal_loss.csv': 0.68575697030,
            'skep_base.csv': 0.67728485854,
+           'skep_hidden_fusion.csv': 0.69258945423,
            'da_focal_loss.csv': 0.67924681920,
-           'bert_hidden_fusion.csv': 0.69749602954,
+           'bert_hidden_fusion.csv': 0.69966576165,
            'bert_cls_seq_mean_max.csv': 0.68319594894}
 
 dfs = [(pd.read_csv(filename), weight) for filename, weight in results.items()]
