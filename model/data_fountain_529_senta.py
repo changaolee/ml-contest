@@ -57,7 +57,9 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
         max_seq_embedding = seq_embeddings.max(axis=1)
 
         concat_embedding = paddle.fluid.layers.concat([pooled_output, mean_seq_embedding, max_seq_embedding], axis=-1)
+        concat_embedding = paddle.unsqueeze(concat_embedding, axis=1)
         pooled_output = self.pooler(concat_embedding)
+        pooled_output = paddle.squeeze(pooled_output, axis=1)
         pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
 
@@ -118,7 +120,9 @@ class DataFountain529SentaSkepClsSeqMeanMaxModel(SkepPretrainedModel):
         max_seq_embedding = seq_embeddings.max(axis=1)
 
         concat_embedding = paddle.fluid.layers.concat([pooled_output, mean_seq_embedding, max_seq_embedding], axis=-1)
+        concat_embedding = paddle.unsqueeze(concat_embedding, axis=1)
         pooled_output = self.pooler(concat_embedding)
+        pooled_output = paddle.squeeze(pooled_output, axis=1)
         pooled_output = self.dropout(pooled_output)
         logits = self.classifier(pooled_output)
 
