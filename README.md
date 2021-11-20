@@ -53,6 +53,12 @@
 ### 配置信息
 #### data fountain 529
 
+- 进一步优化
+    - 伪标签
+    - 对抗训练
+    - 继续 pretrain 再 fine tune
+    - 尝试其他预训练模型
+
 ```
 // 情感分类任务：config/data_fountain_529_senta.json
 {
