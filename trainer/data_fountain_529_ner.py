@@ -186,16 +186,18 @@ class DataFountain529NerTrainer(object):
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len, label_vocab):
         text, labels = example["text"], example["labels"]
-        encoded_inputs = tokenizer(text=text,
+        encoded_inputs = tokenizer(text=list(text),
                                    max_seq_len=max_seq_len,
                                    return_length=True,
                                    is_split_into_words=True)
 
         # -2 for [CLS] and [SEP]
-        if len(encoded_inputs['input_ids']) - 2 < len(example["labels"]):
+        if len(encoded_inputs['input_ids']) - 2 < len(labels):
             labels = labels[:len(encoded_inputs['input_ids']) - 2]
-        labels += ["O"] * (len(encoded_inputs['input_ids']) - len(encoded_inputs['labels']))
-        encoded_inputs["labels"] = [label_vocab[x] for x in example["labels"]]
+        labels = ["O"] + labels + ["O"]
+        labels += ["O"] * (len(encoded_inputs['input_ids']) - len(labels))
+
+        encoded_inputs["labels"] = [label_vocab[x] for x in labels]
 
         return tuple([np.array(x, dtype="int64") for x in [encoded_inputs["input_ids"],
                                                            encoded_inputs["token_type_ids"],
