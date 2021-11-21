@@ -25,7 +25,7 @@ class DataFountain529NerDataset(object):
         df = pd.read_csv(data_path, encoding="utf-8")
         for idx, line in df.iterrows():
             text, bio, qid = line.get("text", ""), line.get("BIO_anno", ""), line.get("id", "")
-            yield {"tokens": list(text), "labels": bio.split(), "qid": qid}
+            yield {"text": text, "labels": bio.split(), "qid": qid}
 
     @staticmethod
     def get_labels():

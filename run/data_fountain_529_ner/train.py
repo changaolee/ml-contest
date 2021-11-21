@@ -43,7 +43,7 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     model, tokenizer = None, None
     logger = config.logger
     if model_name == "bert_base":
-        model = BertForTokenClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
+        model = BertForTokenClassification.from_pretrained("bert-base-chinese", num_classes=len(config.label_list))
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     else:
         logger.error("load model error: {}.".format(model_name))

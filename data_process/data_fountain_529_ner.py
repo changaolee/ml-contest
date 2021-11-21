@@ -63,11 +63,9 @@ class DataFountain529NerDataProcessor(object):
                 train_writer = csv.writer(train_f)
                 train_writer.writerow(["text", "BIO_anno"])
 
-                rows = []
                 for i in range(len(train_idx)):
                     cur_X, cur_y = X.iloc[train_idx[i]], y.iloc[train_idx[i]]
-                    text = [cur_X]["text"]
-                    train_writer.writerow([text, cur_y])
+                    train_writer.writerow([cur_X["text"], cur_y])
 
             dev_path = self.dev_path.format(k + 1)
             with open(dev_path, "w", encoding="utf-8") as dev_f:
@@ -76,8 +74,7 @@ class DataFountain529NerDataProcessor(object):
 
                 for i in range(len(dev_idx)):
                     cur_X, cur_y = X.iloc[dev_idx[i]], y.iloc[dev_idx[i]]
-                    text = cur_X["text"]
-                    dev_writer.writerow([text, cur_y])
+                    dev_writer.writerow([cur_X["text"], cur_y])
 
             if self.k_fold == 0:
                 break

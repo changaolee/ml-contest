@@ -24,6 +24,7 @@ class DataFountain529NerTrainer(object):
     optimizer = None
     criterion = None
     metric = None
+    ignore_label = -100
 
     def __init__(self,
                  model: nn.Layer,
@@ -41,18 +42,21 @@ class DataFountain529NerTrainer(object):
         self._prepare()
 
     def _gen_data_loader(self):
+        label_vocab = load_label_vocab(self.config.label_list)
+        self.no_entity_id = label_vocab["O"]
+
         # 将数据处理成模型可读入的数据格式
         trans_func = partial(
             self.convert_example,
             tokenizer=self.tokenizer,
             max_seq_len=self.config.max_seq_len,
-            label_vocab=load_label_vocab(self.config.label_list))
+            label_vocab=label_vocab)
 
         batchify_fn = lambda samples, fn=Tuple(
             Pad(axis=0, pad_val=self.tokenizer.pad_token_id),  # input_ids
             Pad(axis=0, pad_val=self.tokenizer.pad_token_type_id),  # token_type_ids
             Stack(),  # seq_len
-            Pad(axis=0, pad_val=-1)  # labels
+            Pad(axis=0, pad_val=self.no_entity_id)  # labels
         ): [data for data in fn(samples)]
 
         self.train_data_loader = create_data_loader(
@@ -114,12 +118,12 @@ class DataFountain529NerTrainer(object):
         # self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
 
         # Focal Loss
-        self.criterion = FocalLoss(num_classes=len(self.config.label_vocab))
-        self.eval_criterion = FocalLoss(num_classes=len(self.config.label_vocab))
+        self.criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
+        self.eval_criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
 
         # 评价指标
-        self.metric = ChunkEvaluator(label_list=list(self.config.label_vocab.keys()))
-        self.eval_metric = ChunkEvaluator(label_list=list(self.config.label_vocab.keys()))
+        self.metric = ChunkEvaluator(label_list=self.config.label_list)
+        self.eval_metric = ChunkEvaluator(label_list=self.config.label_list)
 
     def train(self):
         # 开启训练
