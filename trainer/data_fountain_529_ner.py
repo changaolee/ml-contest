@@ -209,22 +209,21 @@ class DataFountain529NerTrainer(object):
         self.model.eval()
         self.eval_metric.reset()
 
-        avg_loss, precision, recall, f1_score = 0., 0., 0., 0.
+        loss, precision, recall, f1_score = 0., 0., 0., 0.
         for batch in self.dev_data_loader:
             input_ids, token_type_ids, lens, labels = batch
             logits = self.model(input_ids, token_type_ids)
             preds = logits.argmax(axis=2)
 
-            loss = self.eval_criterion(logits, labels)
-            avg_loss = paddle.mean(loss)
+            loss = paddle.mean(self.eval_criterion(logits, labels))
 
             n_infer, n_label, n_correct = self.eval_metric.compute(lens, preds, labels)
             self.eval_metric.update(n_infer.numpy(), n_label.numpy(), n_correct.numpy())
             precision, recall, f1_score = self.eval_metric.accumulate()
 
         self.logger.info("「%d/%d」eval loss: %.5f, precision: %.5f, recall: %.5f, f1: %.5f"
-                         % (self.fold, self.total_fold, avg_loss, precision, recall, f1_score))
+                         % (self.fold, self.total_fold, loss, precision, recall, f1_score))
         self.model.train()
         self.eval_metric.reset()
 
-        return avg_loss, precision, recall, f1_score
+        return loss, precision, recall, f1_score
