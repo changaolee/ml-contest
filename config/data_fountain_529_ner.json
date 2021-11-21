@@ -1,0 +1,17 @@
+{
+  "exp_name": "data_fountain_529_ner",
+  "model_name": "bert_base",
+
+  "train_filename": "train_data_public.csv",
+  "test_filename": "test_public.csv",
+
+  "k_fold": 10,
+  "random_state": 2021,
+  "dev_prop": 0.2,
+
+  "max_seq_len": 200,
+
+  "batch_size": 64,
+  "train_epochs": 4,
+  "learning_rate": 2e-5
+}

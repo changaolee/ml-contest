@@ -63,3 +63,10 @@ def create_data_loader(dataset,
     data_loader = paddle.io.DataLoader(
         dataset, batch_sampler=sampler, collate_fn=batchify_fn)
     return data_loader
+
+
+def load_label_vocab(labels: list) -> dict:
+    vocab = {}
+    for i, label in enumerate(labels):
+        vocab[label] = i
+    return vocab
