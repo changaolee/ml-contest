@@ -12,7 +12,7 @@
   "max_seq_len": 200,
 
   "batch_size": 64,
-  "train_epochs": 10,
+  "train_epochs": 6,
   "learning_rate": 2e-5,
   "adam_epsilon": 1e-8
 }

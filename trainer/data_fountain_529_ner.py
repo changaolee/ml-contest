@@ -118,8 +118,8 @@ class DataFountain529NerTrainer(object):
         self.eval_criterion = nn.loss.CrossEntropyLoss(ignore_index=self.ignore_label)
 
         # # Focal Loss
-        # self.criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
-        # self.eval_criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
+        # self.criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.ignore_label)
+        # self.eval_criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.ignore_label)
 
         # 评价指标
         self.metric = ChunkEvaluator(label_list=self.config.label_list)
