@@ -140,8 +140,7 @@ class DataFountain529NerTrainer(object):
                         logits = self.model(input_ids, token_type_ids)
 
                         # 计算损失函数值
-                        loss = self.criterion(logits, labels)
-                        avg_loss = paddle.mean(loss)
+                        loss = paddle.mean(self.criterion(logits, labels))
 
                         # 预测分类概率值
                         preds = logits.argmax(axis=2)
@@ -155,16 +154,16 @@ class DataFountain529NerTrainer(object):
                             self.logger.info(
                                 "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, precision: %.5f, recall: %.5f, f1: %.5f, speed: %.2f step/s"
                                 % (self.fold, self.total_fold, global_step, epoch, step,
-                                   avg_loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
+                                   loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
                             tic_train = time.time()
 
                             train_writer.add_scalar(tag="precision", step=global_step, value=precision)
                             train_writer.add_scalar(tag="recall", step=global_step, value=recall)
                             train_writer.add_scalar(tag="f1", step=global_step, value=f1_score)
-                            train_writer.add_scalar(tag="loss", step=global_step, value=avg_loss)
+                            train_writer.add_scalar(tag="loss", step=global_step, value=loss)
 
                         # 反向梯度回传，更新参数
-                        avg_loss.backward()
+                        loss.backward()
                         self.optimizer.step()
                         self.lr_scheduler.step()
                         self.optimizer.clear_grad()
