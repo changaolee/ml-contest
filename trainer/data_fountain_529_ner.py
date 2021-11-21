@@ -8,7 +8,6 @@ from functools import partial
 from visualdl import LogWriter
 from utils.utils import create_data_loader, mkdir_if_not_exist, load_label_vocab
 from utils.loss import FocalLoss
-import paddle.nn.functional as F
 import numpy as np
 import time
 import paddle
@@ -144,8 +143,7 @@ class DataFountain529NerTrainer(object):
                         avg_loss = paddle.mean(loss)
 
                         # 预测分类概率值
-                        probs = F.softmax(logits, axis=1)
-                        preds = paddle.argmax(probs, axis=1, keepdim=True)
+                        preds = logits.argmax(axis=2)
 
                         n_infer, n_label, n_correct = self.metric.compute(lens, preds, labels)
                         self.metric.update(n_infer.numpy(), n_label.numpy(), n_correct.numpy())
@@ -187,12 +185,18 @@ class DataFountain529NerTrainer(object):
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len, label_vocab):
-        encoded_inputs = tokenizer(
-            text=example["text"], max_seq_len=max_seq_len, return_length=True, is_split_into_words=True
-        )
-        # Token '[CLS]' and '[SEP]' will get label 'O'
-        labels = ["O"] + example["labels"] + ["O"]
-        encoded_inputs["labels"] = [label_vocab[x] for x in labels]
+        text, labels = example["text"], example["labels"]
+        encoded_inputs = tokenizer(text=text,
+                                   max_seq_len=max_seq_len,
+                                   return_length=True,
+                                   is_split_into_words=True)
+
+        # -2 for [CLS] and [SEP]
+        if len(encoded_inputs['input_ids']) - 2 < len(example["labels"]):
+            labels = labels[:len(encoded_inputs['input_ids']) - 2]
+        labels += ["O"] * (len(encoded_inputs['input_ids']) - len(encoded_inputs['labels']))
+        encoded_inputs["labels"] = [label_vocab[x] for x in example["labels"]]
+
         return tuple([np.array(x, dtype="int64") for x in [encoded_inputs["input_ids"],
                                                            encoded_inputs["token_type_ids"],
                                                            encoded_inputs["seq_len"],
