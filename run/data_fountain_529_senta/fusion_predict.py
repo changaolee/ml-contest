@@ -17,22 +17,27 @@ import os
 def fusion_predict():
     base_path = os.path.join('/home/aistudio/work/checkpoint')
 
-    # 待融合的模型 checkpoint 路径，weight 为融合权重（基于提交得分）
+    # 待融合的模型 checkpoint 路径，weight 为融合权重
     fusion_model_checkpoints = {
+        'bert_base': {
+            'paths': [os.path.join(base_path, 'bert_base', 'model_{}.pdparams'.format(i)) for i in range(10)],
+            'weight': 1,
+        },
         'bert_hidden_fusion': {
             'paths': [os.path.join(base_path, 'bert_hidden_fusion', 'model_{}.pdparams'.format(i)) for i in range(10)],
-            'weight': 0.69966576165,
+            'weight': 1,
         },
         'skep_hidden_fusion': {
             'paths': [os.path.join(base_path, 'skep_hidden_fusion', 'model_{}.pdparams'.format(i)) for i in range(10)],
-            'weight': 0.69258945423
+            'weight': 1
         }
     }
 
-    # 获取每个模型的预测概率
+    # 获取每个模型的预测结果
     fusion_result = []
     for model_name, model_checkpoints_config in fusion_model_checkpoints.items():
-        fusion_result.append(predict(model_name, model_checkpoints_config))
+        weight = model_checkpoints_config['weight']
+        fusion_result.append([predict(model_name, model_checkpoints_config), weight])
 
     # 融合所有模型的预测结果
     result = merge_fusion_result(fusion_result)
@@ -48,25 +53,24 @@ def fusion_predict():
 
 def merge_fusion_result(fusion_result):
     merge_result = {}
-    for single_result in fusion_result:
+    for single_result, weight in fusion_result:
         for line in single_result:
-            qid, probs = line[0], line[1]
+            qid, label = line[0], line[1]
             if qid not in merge_result:
                 merge_result[qid] = [0.] * 3
-            merge_result[qid] = np.sum([merge_result[qid], probs], axis=0)
+            merge_result[qid][label] += 1. * weight
     merge_result = sorted(merge_result.items(), key=lambda x: x[0], reverse=False)
 
     result = []
     for line in merge_result:
-        qid, probs = line[0], line[1]
-        label = np.argmax(probs)
+        qid, scores = line[0], line[1]
+        label = np.argmax(scores)
         result.append([qid, label])
     return result
 
 
 def predict(model_name: str, model_checkpoints_config: dict):
     model_paths = model_checkpoints_config['paths']
-    weight = model_checkpoints_config['weight']
 
     config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
 
@@ -94,7 +98,7 @@ def predict(model_name: str, model_checkpoints_config: dict):
         k_fold_result.append(fold_result)
 
     # 融合 k 折模型的预测结果
-    result = merge_k_fold_result(k_fold_result, weight)
+    result = merge_k_fold_result(k_fold_result)
 
     return result
 
@@ -115,7 +119,7 @@ def merge_tta_result(tta_result):
     return result
 
 
-def merge_k_fold_result(k_fold_result, weight):
+def merge_k_fold_result(k_fold_result):
     merge_result = {}
     for fold_result in k_fold_result:
         for line in fold_result:
@@ -128,9 +132,8 @@ def merge_k_fold_result(k_fold_result, weight):
     result = []
     for line in merge_result:
         qid, probs = line[0], line[1]
-        probs = np.divide(probs, len(k_fold_result)).tolist()
-        probs = np.multiply(probs, weight).tolist()
-        result.append([qid, probs])
+        label = np.argmax(probs)
+        result.append([qid, label])
     return result
 
 
