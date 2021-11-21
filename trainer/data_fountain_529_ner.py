@@ -52,10 +52,10 @@ class DataFountain529NerTrainer(object):
             label_vocab=label_vocab)
 
         batchify_fn = lambda samples, fn=Tuple(
-            Pad(axis=0, pad_val=self.tokenizer.pad_token_id),  # input_ids
-            Pad(axis=0, pad_val=self.tokenizer.pad_token_type_id),  # token_type_ids
-            Stack(),  # seq_len
-            Pad(axis=0, pad_val=self.no_entity_id)  # labels
+            Pad(axis=0, pad_val=self.tokenizer.pad_token_id, dtype='int32'),  # input_ids
+            Pad(axis=0, pad_val=self.tokenizer.pad_token_type_id, dtype='int32'),  # token_type_ids
+            Stack(dtype='int64'),  # seq_len
+            Pad(axis=0, pad_val=self.no_entity_id, dtype='int64')  # labels
         ): [data for data in fn(samples)]
 
         self.train_data_loader = create_data_loader(
@@ -108,17 +108,18 @@ class DataFountain529NerTrainer(object):
         # 定义 Optimizer
         self.optimizer = paddle.optimizer.AdamW(
             learning_rate=self.lr_scheduler,
+            epsilon=self.config.adam_epsilon,
             parameters=self.model.parameters(),
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
-        # # 交叉熵损失函数
-        # self.criterion = paddle.nn.loss.CrossEntropyLoss()
-        # self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
+        # 交叉熵损失函数
+        self.criterion = paddle.nn.loss.CrossEntropyLoss(ignore_index=self.no_entity_id)
+        self.eval_criterion = paddle.nn.loss.CrossEntropyLoss(ignore_index=self.no_entity_id)
 
-        # Focal Loss
-        self.criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
-        self.eval_criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
+        # # Focal Loss
+        # self.criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
+        # self.eval_criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
 
         # 评价指标
         self.metric = ChunkEvaluator(label_list=self.config.label_list)
@@ -132,7 +133,7 @@ class DataFountain529NerTrainer(object):
         with LogWriter(logdir=self.train_vis_dir) as train_writer:
             with LogWriter(logdir=self.dev_vis_dir) as dev_writer:
                 for epoch in range(1, self.epochs + 1):
-                    for step, batch in enumerate(self.train_data_loader, start=1):
+                    for step, batch in enumerate(self.train_data_loader):
                         input_ids, token_type_ids, lens, labels = batch
 
                         # 喂数据给 model
@@ -154,7 +155,7 @@ class DataFountain529NerTrainer(object):
                             self.logger.info(
                                 "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, precision: %.5f, recall: %.5f, f1: %.5f, speed: %.2f step/s"
                                 % (self.fold, self.total_fold, global_step, epoch, step,
-                                   loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
+                                   avg_loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
                             tic_train = time.time()
 
                             train_writer.add_scalar(tag="precision", step=global_step, value=precision)
@@ -185,8 +186,8 @@ class DataFountain529NerTrainer(object):
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len, label_vocab):
-        text, labels = example["text"], example["labels"]
-        encoded_inputs = tokenizer(text=list(text),
+        tokens, labels = example["tokens"], example["labels"]
+        encoded_inputs = tokenizer(text=tokens,
                                    max_seq_len=max_seq_len,
                                    return_length=True,
                                    is_split_into_words=True)
@@ -197,7 +198,7 @@ class DataFountain529NerTrainer(object):
         labels = ["O"] + labels + ["O"]
         labels += ["O"] * (len(encoded_inputs['input_ids']) - len(labels))
 
-        encoded_inputs["labels"] = [label_vocab[x] for x in labels]
+        encoded_inputs["labels"] = [label_vocab[label] for label in labels]
 
         return tuple([np.array(x, dtype="int64") for x in [encoded_inputs["input_ids"],
                                                            encoded_inputs["token_type_ids"],

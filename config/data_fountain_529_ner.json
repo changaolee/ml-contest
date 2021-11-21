@@ -13,5 +13,6 @@
 
   "batch_size": 64,
   "train_epochs": 4,
-  "learning_rate": 2e-5
+  "learning_rate": 5e-5,
+  "adam_epsilon": 1e-8
 }
