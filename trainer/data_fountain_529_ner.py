@@ -114,8 +114,8 @@ class DataFountain529NerTrainer(object):
             apply_decay_param_fun=lambda x: x in decay_params)
 
         # 交叉熵损失函数
-        self.criterion = paddle.nn.loss.CrossEntropyLoss(ignore_index=self.no_entity_id)
-        self.eval_criterion = paddle.nn.loss.CrossEntropyLoss(ignore_index=self.no_entity_id)
+        self.criterion = nn.loss.CrossEntropyLoss(ignore_index=self.ignore_label)
+        self.eval_criterion = nn.loss.CrossEntropyLoss(ignore_index=self.ignore_label)
 
         # # Focal Loss
         # self.criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.no_entity_id)
