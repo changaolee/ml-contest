@@ -1,6 +1,6 @@
 {
   "exp_name": "data_fountain_529_ner",
-  "model_name": "ernie_base",
+  "model_name": "bert_crf",
 
   "train_filename": "train_data_public.csv",
   "test_filename": "test_public.csv",
