@@ -5,13 +5,13 @@ from infer.data_fountain_529_ner import DataFountain529NerInfer
 from utils.config_utils import get_config, CONFIG_PATH
 from utils.utils import mkdir_if_not_exist
 from bunch import Bunch
-import numpy as np
+from scipy import stats
 import csv
 import os
 
 
 def predict():
-    config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
+    config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_ner.json"))
 
     # 原始数据预处理
     data_processor = DataFountain529NerDataProcessor(config)
@@ -49,36 +49,33 @@ def predict():
         fold_result = infer.predict()
         k_fold_result.append(fold_result)
 
-    # TODO:
-    # # 融合 k 折模型的预测结果
-    # result = merge_k_fold_result(k_fold_result)
-    #
-    # # 写入预测结果
-    # res_dir = os.path.join(config.res_dir, config.model_name)
-    # mkdir_if_not_exist(res_dir)
-    # with open(os.path.join(res_dir, "result.csv"), "w", encoding="utf-8") as f:
-    #     writer = csv.writer(f)
-    #     writer.writerow(["id", "class"])
-    #     for line in result:
-    #         qid, label = line
-    #         writer.writerow([qid, label])
+    # 融合 k 折模型的预测结果
+    result = merge_k_fold_result(k_fold_result)
+
+    # 写入预测结果
+    res_dir = os.path.join(config.res_dir, config.model_name)
+    mkdir_if_not_exist(res_dir)
+    with open(os.path.join(res_dir, "result.csv"), "w", encoding="utf-8") as f:
+        writer = csv.writer(f)
+        writer.writerow(["id", "BIO_anno"])
+        for line in result:
+            qid, tags = line
+            writer.writerow([qid, " ".join(tags)])
 
 
 def merge_k_fold_result(k_fold_result):
     merge_result = {}
     for fold_result in k_fold_result:
         for line in fold_result:
-            qid, probs = line[0], line[1]
+            qid, tags = line[0], line[1]
             if qid not in merge_result:
-                merge_result[qid] = [0.] * 3
-            merge_result[qid] = np.sum([merge_result[qid], probs], axis=0)
-    merge_result = sorted(merge_result.items(), key=lambda x: x[0], reverse=False)
+                merge_result[qid] = []
+            merge_result[qid].append(tags)
 
     result = []
-    for line in merge_result:
-        qid, probs = line[0], line[1]
-        label = np.argmax(probs)
-        result.append([qid, label])
+    for qid, tags in merge_result:
+        merge_tags = stats.mode(tags)[0][0]
+        result.append([qid, merge_tags])
     return result
 
 
