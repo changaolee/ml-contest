@@ -1,6 +1,6 @@
 from paddlenlp.transformers import BertTokenizer, BertForTokenClassification
 from paddlenlp.transformers import ErnieTokenizer, ErnieForTokenClassification
-from model.data_fountain_529_ner import BertCrfForTokenClassification
+from model.data_fountain_529_ner import BertCrfForTokenClassification, ErnieCrfForTokenClassification
 from data_process.data_fountain_529_ner import DataFountain529NerDataProcessor
 from dataset.data_fountain_529_ner import DataFountain529NerDataset
 from trainer.data_fountain_529_ner import DataFountain529NerTrainer
@@ -53,6 +53,10 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     elif model_name == "ernie_base":
         model = ErnieForTokenClassification.from_pretrained("ernie-1.0", num_classes=len(config.label_list))
+        tokenizer = ErnieTokenizer.from_pretrained("ernie-1.0")
+    elif model_name == "ernie_crf":
+        ernie = ErnieForTokenClassification.from_pretrained("ernie-1.0", num_classes=len(config.label_list))
+        model = ErnieCrfForTokenClassification(ernie)
         tokenizer = ErnieTokenizer.from_pretrained("ernie-1.0")
     else:
         logger.error("load model error: {}.".format(model_name))
