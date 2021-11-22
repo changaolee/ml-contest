@@ -74,8 +74,9 @@ class DataFountain529NerInfer(object):
             pred = paddle.argmax(logits, axis=-1)
 
             for i, end in enumerate(lens):
-                tags = [id2label[x] for x in pred[i][1:end - 1]]
-                result.append([qids[i], tags])
+                tags = [id2label[x.numpy()[0]] for x in pred[i][1:end - 1]]
+                qid = qids[i].numpy()[0]
+                result.append([qid, tags])
         return result
 
     @staticmethod

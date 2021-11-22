@@ -73,7 +73,7 @@ def merge_k_fold_result(k_fold_result):
             merge_result[qid].append(tags)
 
     result = []
-    for qid, tags in merge_result:
+    for qid, tags in merge_result.items():
         merge_tags = stats.mode(tags)[0][0]
         result.append([qid, merge_tags])
     return result
