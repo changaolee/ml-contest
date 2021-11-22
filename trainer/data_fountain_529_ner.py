@@ -191,7 +191,7 @@ class DataFountain529NerTrainer(object):
                                 dev_writer.add_scalar(tag="loss", step=global_step, value=loss_dev)
 
                             # 保存当前模型参数等
-                            if global_step >= 100:
+                            if global_step >= 400:
                                 save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
                                 mkdir_if_not_exist(save_dir)
                                 paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
