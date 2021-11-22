@@ -136,31 +136,42 @@ class DataFountain529NerTrainer(object):
                     for step, batch in enumerate(self.train_data_loader):
                         input_ids, token_type_ids, lens, labels = batch
 
-                        # 喂数据给 model
-                        logits = self.model(input_ids, token_type_ids)
+                        if self.config.model_name in ["bert_crf", "ernie_crf"]:
+                            loss = paddle.mean(self.model(input_ids, token_type_ids, lengths=lens, labels=labels))
 
-                        # 计算损失函数值
-                        loss = paddle.mean(self.criterion(logits, labels))
+                            global_step += 1
+                            if global_step % 10 == 0:
+                                self.logger.info(
+                                    "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, speed: %.2f step/s"
+                                    % (self.fold, self.total_fold, global_step, epoch, step, loss, 10 / (time.time() - tic_train)))
+                                tic_train = time.time()
 
-                        # 预测分类概率值
-                        preds = logits.argmax(axis=2)
+                                train_writer.add_scalar(tag="loss", step=global_step, value=loss)
+                        else:
+                            logits = self.model(input_ids, token_type_ids)
 
-                        n_infer, n_label, n_correct = self.metric.compute(lens, preds, labels)
-                        self.metric.update(n_infer.numpy(), n_label.numpy(), n_correct.numpy())
-                        precision, recall, f1_score = self.metric.accumulate()
+                            # 计算损失函数值
+                            loss = paddle.mean(self.criterion(logits, labels))
 
-                        global_step += 1
-                        if global_step % 10 == 0:
-                            self.logger.info(
-                                "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, precision: %.5f, recall: %.5f, f1: %.5f, speed: %.2f step/s"
-                                % (self.fold, self.total_fold, global_step, epoch, step,
-                                   loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
-                            tic_train = time.time()
+                            # 预测分类概率值
+                            preds = logits.argmax(axis=2)
 
-                            train_writer.add_scalar(tag="precision", step=global_step, value=precision)
-                            train_writer.add_scalar(tag="recall", step=global_step, value=recall)
-                            train_writer.add_scalar(tag="f1", step=global_step, value=f1_score)
-                            train_writer.add_scalar(tag="loss", step=global_step, value=loss)
+                            n_infer, n_label, n_correct = self.metric.compute(lens, preds, labels)
+                            self.metric.update(n_infer.numpy(), n_label.numpy(), n_correct.numpy())
+                            precision, recall, f1_score = self.metric.accumulate()
+
+                            global_step += 1
+                            if global_step % 10 == 0:
+                                self.logger.info(
+                                    "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, precision: %.5f, recall: %.5f, f1: %.5f, speed: %.2f step/s"
+                                    % (self.fold, self.total_fold, global_step, epoch, step,
+                                       loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
+                                tic_train = time.time()
+
+                                train_writer.add_scalar(tag="precision", step=global_step, value=precision)
+                                train_writer.add_scalar(tag="recall", step=global_step, value=recall)
+                                train_writer.add_scalar(tag="f1", step=global_step, value=f1_score)
+                                train_writer.add_scalar(tag="loss", step=global_step, value=loss)
 
                         # 反向梯度回传，更新参数
                         loss.backward()
@@ -175,7 +186,9 @@ class DataFountain529NerTrainer(object):
                             dev_writer.add_scalar(tag="precision", step=global_step, value=precision_dev)
                             dev_writer.add_scalar(tag="recall", step=global_step, value=recall_dev)
                             dev_writer.add_scalar(tag="f1", step=global_step, value=f1_score_dev)
-                            dev_writer.add_scalar(tag="loss", step=global_step, value=loss_dev)
+
+                            if self.config.model_name not in ["bert_crf", "ernie_crf"]:
+                                dev_writer.add_scalar(tag="loss", step=global_step, value=loss_dev)
 
                             # 保存当前模型参数等
                             if global_step >= 100:
@@ -212,14 +225,22 @@ class DataFountain529NerTrainer(object):
         loss, precision, recall, f1_score = 0., 0., 0., 0.
         for batch in self.dev_data_loader:
             input_ids, token_type_ids, lens, labels = batch
-            logits = self.model(input_ids, token_type_ids)
-            preds = logits.argmax(axis=2)
 
-            loss = paddle.mean(self.eval_criterion(logits, labels))
+            if self.config.model_name in ["bert_crf", "ernie_crf"]:
+                preds = self.model(input_ids, token_type_ids, lengths=lens)
 
-            n_infer, n_label, n_correct = self.eval_metric.compute(lens, preds, labels)
-            self.eval_metric.update(n_infer.numpy(), n_label.numpy(), n_correct.numpy())
-            precision, recall, f1_score = self.eval_metric.accumulate()
+                n_infer, n_label, n_correct = self.eval_metric.compute(lens, preds, labels)
+                self.eval_metric.update(n_infer.numpy(), n_label.numpy(), n_correct.numpy())
+                precision, recall, f1_score = self.eval_metric.accumulate()
+            else:
+                logits = self.model(input_ids, token_type_ids)
+                preds = logits.argmax(axis=2)
+
+                loss = paddle.mean(self.eval_criterion(logits, labels))
+
+                n_infer, n_label, n_correct = self.eval_metric.compute(lens, preds, labels)
+                self.eval_metric.update(n_infer.numpy(), n_label.numpy(), n_correct.numpy())
+                precision, recall, f1_score = self.eval_metric.accumulate()
 
         self.logger.info("「%d/%d」eval loss: %.5f, precision: %.5f, recall: %.5f, f1: %.5f"
                          % (self.fold, self.total_fold, loss, precision, recall, f1_score))

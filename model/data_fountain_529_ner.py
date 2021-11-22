@@ -2,7 +2,7 @@ from paddlenlp.layers.crf import LinearChainCrf, LinearChainCrfLoss, ViterbiDeco
 import paddle
 
 
-class BertCrfForTokenClassification(paddle.nn.layer):
+class BertCrfForTokenClassification(paddle.nn.Layer):
     def __init__(self, bert, crf_lr=100):
         super().__init__()
         self.num_classes = bert.num_classes
