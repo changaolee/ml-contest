@@ -1,4 +1,5 @@
 from paddlenlp.transformers import BertTokenizer, BertForTokenClassification
+from paddlenlp.transformers import ErnieTokenizer, ErnieForTokenClassification
 from data_process.data_fountain_529_ner import DataFountain529NerDataProcessor
 from dataset.data_fountain_529_ner import DataFountain529NerDataset
 from infer.data_fountain_529_ner import DataFountain529NerInfer
@@ -23,16 +24,16 @@ def predict():
 
     k_fold_result = []
     k_fold_models = {
-        1: "model_610",
-        2: "model_600",
-        3: "model_590",
-        4: "model_590",
-        5: "model_610",
-        6: "model_610",
-        7: "model_580",
-        8: "model_620",
-        9: "model_620",
-        10: "model_600"
+        1: "",
+        2: "",
+        3: "",
+        4: "",
+        5: "",
+        6: "",
+        7: "",
+        8: "",
+        9: "",
+        10: ""
     }
     for fold, model_path in k_fold_models.items():
         # 获取测试集
@@ -85,6 +86,9 @@ def get_model_and_tokenizer(model_name: str, config: Bunch):
     if model_name == "bert_base":
         model = BertForTokenClassification.from_pretrained("bert-base-chinese", num_classes=len(config.label_list))
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    elif model_name == "ernie_base":
+        model = ErnieForTokenClassification.from_pretrained("ernie-1.0", num_classes=len(config.label_list))
+        tokenizer = ErnieTokenizer.from_pretrained("ernie-1.0")
     else:
         logger.error("load model error: {}.".format(model_name))
     return model, tokenizer
