@@ -2,6 +2,7 @@ import pandas as pd
 import csv
 
 results = {'bert_base.csv': 0.69339421919,
+           'skep_base.csv': 0.68728485854,
            'skep_hidden_fusion.csv': 0.69258945423,
            'bert_hidden_fusion.csv': 0.69966576165}
 
