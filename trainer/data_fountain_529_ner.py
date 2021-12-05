@@ -3,7 +3,7 @@ from paddlenlp.datasets import MapDataset
 from paddlenlp.data import Stack, Tuple, Pad
 from paddlenlp.metrics import ChunkEvaluator
 from paddle import nn
-from bunch import Bunch
+from dotmap import DotMap
 from functools import partial
 from visualdl import LogWriter
 from utils.utils import create_data_loader, mkdir_if_not_exist, load_label_vocab
@@ -30,7 +30,7 @@ class DataFountain529NerTrainer(object):
                  tokenizer: PretrainedTokenizer,
                  train_ds: MapDataset,
                  dev_ds: MapDataset,
-                 config: Bunch):
+                 config: DotMap):
         self.model = model
         self.tokenizer = tokenizer
         self.train_ds = train_ds

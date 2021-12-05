@@ -2,7 +2,7 @@ from paddlenlp.transformers import PretrainedTokenizer, LinearDecayWithWarmup
 from paddlenlp.datasets import MapDataset
 from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
-from bunch import Bunch
+from dotmap import DotMap
 from functools import partial
 from visualdl import LogWriter
 from utils.utils import create_data_loader, mkdir_if_not_exist
@@ -30,7 +30,7 @@ class DataFountain529SentaTrainer(object):
                  tokenizer: PretrainedTokenizer,
                  train_ds: MapDataset,
                  dev_ds: MapDataset,
-                 config: Bunch):
+                 config: DotMap):
         self.model = model
         self.tokenizer = tokenizer
         self.train_ds = train_ds
@@ -115,7 +115,6 @@ class DataFountain529SentaTrainer(object):
         # self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
 
         # Focal Loss
-        weight = [(1 - prop) * 10 for prop in self.config.label_dist]
         weight = None  # 默认值效果会更好
         self.criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)
         self.eval_criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)

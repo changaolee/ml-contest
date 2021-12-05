@@ -1,5 +1,5 @@
 from sklearn.model_selection import KFold
-from bunch import Bunch
+from dotmap import DotMap
 from utils.utils import mkdir_if_not_exist
 from utils.config_utils import DATA_PATH
 import pandas as pd
@@ -8,7 +8,7 @@ import os
 
 
 class DataFountain529NerDataProcessor(object):
-    def __init__(self, config: Bunch):
+    def __init__(self, config: DotMap):
         self.config = config
 
         # 原始数据集路径

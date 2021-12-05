@@ -1,4 +1,4 @@
-from bunch import Bunch
+from dotmap import DotMap
 from utils.utils import mkdir_if_not_exist, get_logger
 import json
 import os
@@ -10,16 +10,25 @@ CONFIG_PATH = os.path.join(ROOT_PATH, "config")
 RESOURCE_PATH = os.path.join(ROOT_PATH, "resource")
 
 
-def get_config(json_file):
+def get_config(json_file: str, mode: str = ""):
     """
     获取配置类
     :param json_file: 配置 json 文件
+    :param mode: train / predict
     :return: 配置类
     """
-    with open(json_file, 'r') as config_file:
+    with open(json_file, "r") as config_file:
         config_dict = json.load(config_file)
 
-    config = Bunch(config_dict)
+    config = DotMap(config_dict)
+    if mode:
+        if mode == "train":
+            config = DotMap({**config, **config.train})
+        elif mode == "predict":
+            config = DotMap({**config, **config.predict})
+        else:
+            raise RuntimeError("get config error mode: {}".format(mode))
+
     config.ckpt_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "checkpoint")  # 模型
     config.log_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "log")  # 日志
     config.vis_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "visual_log")  # 可视化
@@ -33,3 +42,8 @@ def get_config(json_file):
     config.logger = get_logger(config.log_dir, config.exp_name)
 
     return config
+
+
+def print_config(config: DotMap):
+    del config.logger
+    print(json.dumps(config.toDict()))

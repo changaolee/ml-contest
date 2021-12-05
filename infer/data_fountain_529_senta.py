@@ -2,7 +2,7 @@ from paddlenlp.transformers import PretrainedTokenizer
 from paddlenlp.datasets import MapDataset
 from paddlenlp.data import Stack, Tuple, Pad
 from paddle import nn
-from bunch import Bunch
+from dotmap import DotMap
 from functools import partial
 from utils.utils import create_data_loader
 import paddle.nn.functional as F
@@ -17,7 +17,7 @@ class DataFountain529SentaInfer(object):
                  model: nn.Layer,
                  tokenizer: PretrainedTokenizer,
                  test_ds: MapDataset,
-                 config: Bunch):
+                 config: DotMap):
         self.model = model
         self.tokenizer = tokenizer
         self.test_ds = test_ds

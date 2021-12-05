@@ -1,5 +1,5 @@
 from paddlenlp.transformers import BertPretrainedModel, SkepPretrainedModel
-from bunch import Bunch
+from dotmap import DotMap
 import paddle
 
 
@@ -8,7 +8,7 @@ class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
     Bert 隐藏层向量动态融合
     """
 
-    def __init__(self, bert, config: Bunch):
+    def __init__(self, bert, config: DotMap):
         super(DataFountain529SentaBertHiddenFusionModel, self).__init__()
         self.config = config
         self.bert = bert
@@ -37,7 +37,7 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
     Bert：最后一层 pooled_output 与 Seq Mean、Max 动态融合
     """
 
-    def __init__(self, bert, config: Bunch):
+    def __init__(self, bert, config: DotMap):
         super(DataFountain529SentaBertClsSeqMeanMaxModel, self).__init__()
         self.config = config
         self.bert = bert
@@ -69,7 +69,7 @@ class DataFountain529SentaSkepHiddenFusionModel(SkepPretrainedModel):
     Skep 隐藏层向量动态融合
     """
 
-    def __init__(self, skep, config: Bunch):
+    def __init__(self, skep, config: DotMap):
         super(DataFountain529SentaSkepHiddenFusionModel, self).__init__()
         self.config = config
         self.skep = skep
@@ -98,7 +98,7 @@ class DataFountain529SentaSkepClsSeqMeanMaxModel(SkepPretrainedModel):
     Skep：最后一层 pooled_output 与 Seq Mean、Max 动态融合
     """
 
-    def __init__(self, skep, config: Bunch):
+    def __init__(self, skep, config: DotMap):
         super(DataFountain529SentaSkepClsSeqMeanMaxModel, self).__init__()
         self.config = config
         self.skep = skep

@@ -1,5 +1,5 @@
 from paddlenlp.datasets import load_dataset
-from bunch import Bunch
+from dotmap import DotMap
 import pandas as pd
 
 
@@ -8,7 +8,7 @@ class DataFountain529NerDataset(object):
     df-529 NER 数据集
     """
 
-    def __init__(self, config: Bunch):
+    def __init__(self, config: DotMap):
         super().__init__()
         self.config = config
 

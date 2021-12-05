@@ -8,7 +8,7 @@ from data_process.data_fountain_529_senta import DataFountain529SentaDataProcess
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from infer.data_fountain_529_senta import DataFountain529SentaInfer
 from utils.config_utils import get_config, CONFIG_PATH
-from bunch import Bunch
+from dotmap import DotMap
 import numpy as np
 import csv
 import os
@@ -137,7 +137,7 @@ def merge_k_fold_result(k_fold_result):
     return result
 
 
-def get_model_and_tokenizer(model_name: str, config: Bunch):
+def get_model_and_tokenizer(model_name: str, config: DotMap):
     model, tokenizer = None, None
     logger = config.logger
     if model_name == "bert_base":

@@ -5,7 +5,7 @@ from data_process.data_fountain_529_ner import DataFountain529NerDataProcessor
 from dataset.data_fountain_529_ner import DataFountain529NerDataset
 from trainer.data_fountain_529_ner import DataFountain529NerTrainer
 from utils.config_utils import get_config, CONFIG_PATH
-from bunch import Bunch
+from dotmap import DotMap
 import os
 
 
@@ -41,7 +41,7 @@ def train():
         trainer.train()
 
 
-def get_model_and_tokenizer(model_name: str, config: Bunch):
+def get_model_and_tokenizer(model_name: str, config: DotMap):
     model, tokenizer = None, None
     logger = config.logger
     if model_name == "bert_base":
