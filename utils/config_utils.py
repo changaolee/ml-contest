@@ -22,12 +22,7 @@ def get_config(json_file: str, mode: str = ""):
 
     config = DotMap(config_dict)
     if mode:
-        if mode == "train":
-            config = DotMap({**config, **config.train})
-        elif mode == "predict":
-            config = DotMap({**config, **config.predict})
-        else:
-            raise RuntimeError("get config error mode: {}".format(mode))
+        config = DotMap({**config, **config[mode]})
 
     config.ckpt_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "checkpoint")  # 模型
     config.log_dir = os.path.join(ROOT_PATH, "experiment", config.exp_name, "log")  # 日志

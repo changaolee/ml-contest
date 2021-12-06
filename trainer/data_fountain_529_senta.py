@@ -35,17 +35,17 @@ class DataFountain529SentaTrainer(object):
         self.tokenizer = tokenizer
         self.train_ds = train_ds
         self.dev_ds = dev_ds
-        self.config = config
-        self.logger = self.config.logger
-        self._gen_data_loader()
-        self._prepare()
+        self.m_conf = config.model_config[config.model_name]
+        self.logger = config.logger
+        self._gen_data_loader(config)
+        self._prepare(config)
 
-    def _gen_data_loader(self):
+    def _gen_data_loader(self, config: DotMap):
         # 将数据处理成模型可读入的数据格式
         trans_func = partial(
             self.convert_example,
             tokenizer=self.tokenizer,
-            max_seq_len=self.config.max_seq_len)
+            max_seq_len=self.m_conf.max_seq_len)
 
         # 将数据组成批量式数据，如
         # 将不同长度的文本序列 padding 到批量式数据中最大长度
@@ -60,34 +60,30 @@ class DataFountain529SentaTrainer(object):
             self.train_ds,
             trans_fn=trans_func,
             mode='train',
-            batch_size=self.config.batch_size,
+            batch_size=config.batch_size,
             batchify_fn=batchify_fn)
         self.dev_data_loader = create_data_loader(
             self.dev_ds,
             trans_fn=trans_func,
             mode='dev',
-            batch_size=self.config.batch_size,
+            batch_size=config.batch_size,
             batchify_fn=batchify_fn)
 
-    def _prepare(self):
+    def _prepare(self, config: DotMap):
         # 当前训练折次
-        self.fold = self.config.fold
+        self.fold = config.fold
         # 训练折数
-        self.total_fold = self.config.k_fold
+        self.total_fold = config.k_fold or 1
         # 训练轮次
-        self.epochs = self.config.train_epochs
+        self.epochs = config.epochs
 
-        # 训练过程中保存模型参数的文件夹
-        self.ckpt_dir = os.path.join(self.config.ckpt_dir, self.config.model_name, "fold_{}".format(self.fold))
+        # 保存模型参数的文件夹
+        self.ckpt_dir = os.path.join(config.ckpt_dir, config.model_name, "fold_{}".format(self.fold))
         mkdir_if_not_exist(self.ckpt_dir)
 
         # 可视化日志的文件夹
-        self.train_vis_dir = os.path.join(
-            self.config.vis_dir, self.config.model_name, "fold_{}/train".format(self.fold)
-        )
-        self.dev_vis_dir = os.path.join(
-            self.config.vis_dir, self.config.model_name, "fold_{}/dev".format(self.fold)
-        )
+        self.train_vis_dir = os.path.join(config.vis_dir, config.model_name, "fold_{}/train".format(self.fold))
+        self.dev_vis_dir = os.path.join(config.vis_dir, config.model_name, "fold_{}/dev".format(self.fold))
         mkdir_if_not_exist(self.train_vis_dir)
         mkdir_if_not_exist(self.dev_vis_dir)
 
@@ -95,7 +91,7 @@ class DataFountain529SentaTrainer(object):
         self.num_training_steps = len(self.train_data_loader) * self.epochs
 
         # 定义 learning_rate_scheduler，负责在训练过程中对 lr 进行调度
-        self.lr_scheduler = LinearDecayWithWarmup(self.config.learning_rate, self.num_training_steps, 0.0)
+        self.lr_scheduler = LinearDecayWithWarmup(config.learning_rate, self.num_training_steps, 0.0)
 
         # Generate parameter names needed to perform weight decay.
         # All bias and LayerNorm parameters are excluded.
@@ -110,18 +106,22 @@ class DataFountain529SentaTrainer(object):
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
-        # # 交叉熵损失函数
-        # self.criterion = paddle.nn.loss.CrossEntropyLoss()
-        # self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
+        assert config.loss_func in ["ce_loss", "focal_loss"], \
+            "config error loss function: {}".format(config.loss_func)
 
-        # Focal Loss
-        weight = None  # 默认值效果会更好
-        self.criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)
-        self.eval_criterion = FocalLoss(num_classes=self.config.num_classes, weight=weight)
+        if config.loss_func == "ce_loss":
+            # 交叉熵损失函数
+            self.criterion = paddle.nn.loss.CrossEntropyLoss()
+            self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
+        elif config.loss_func == "focal_loss":
+            # Focal Loss
+            weight = None  # 默认值效果会更好
+            self.criterion = FocalLoss(num_classes=config.num_classes, weight=weight)
+            self.eval_criterion = FocalLoss(num_classes=config.num_classes, weight=weight)
 
         # Kappa 评价指标
-        self.metric = Kappa(self.config.num_classes)
-        self.eval_metric = Kappa(self.config.num_classes)
+        self.metric = Kappa(config.num_classes)
+        self.eval_metric = Kappa(config.num_classes)
 
         # Acc 评价指标
         self.acc_metric = paddle.metric.Accuracy()

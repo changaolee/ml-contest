@@ -18,6 +18,8 @@
     "epochs": 4,
     "learning_rate": 2e-5,
 
+    "loss_func": "focal_loss",
+
     "k_fold": 10,
     "random_state": 2021,
 
@@ -26,7 +28,8 @@
       "dev_prop": 0.2,
       "model_name": "bert_baseline",
       "da_options": [],
-      "enable_text_clean": true
+      "enable_text_clean": true,
+      "loss_func": "ce_loss"
     }
   },
 

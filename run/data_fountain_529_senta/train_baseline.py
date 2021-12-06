@@ -15,9 +15,6 @@ def train_baseline():
     data_processor = DataFountain529SentaDataProcessor(config)
     data_processor.process()
 
-    print_config(config)
-    return
-
     folds = [0] if config.k_fold == 0 else range(config.k_fold)
     for fold in folds:
         config.fold = fold
@@ -28,7 +25,7 @@ def train_baseline():
         )
 
         # 加载 model 和 tokenizer
-        model, tokenizer = get_model_and_tokenizer(config.model_name, config)
+        model, tokenizer = get_model_and_tokenizer(config)
 
         # 获取训练器
         trainer = DataFountain529SentaTrainer(
