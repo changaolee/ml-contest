@@ -2,7 +2,7 @@
 
 1. 初始化环境变量
 
-> source env.sh
+> source env-gpu.sh
 
 2. 开始训练
 
@@ -10,7 +10,7 @@
 
 3. 执行预测
 
-> python3 run/{exp_name}/test.py
+> python3 run/{exp_name}/predict.py
 
 ### 目录结构
 
@@ -85,13 +85,3 @@
   "learning_rate": 2e-5
 }
 ```
-
-### packages 修改记录
-
-#### 1. RobertaModel 的 forward 方法增加 output_hidden_states 参数
-
-文件路径：`paddlenlp/transformers/roberta/modeling.py`
-
-#### 2. SkepModel 的 forward 方法增加 output_hidden_states 参数
-
-文件路径：`paddlenlp/transformers/skep/modeling.py`
