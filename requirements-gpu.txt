@@ -117,7 +117,7 @@ openpyxl==3.0.5
 packaging==20.9
 paddlehub==2.0.4
 paddlenlp==2.0.1
-paddlepaddle==2.1.2
+paddlepaddle-gpu==2.1.2.post101
 pamela==1.0.0
 pandas==1.1.5
 pandocfilters==1.4.2
