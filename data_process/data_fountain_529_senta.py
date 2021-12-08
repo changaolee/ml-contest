@@ -1,6 +1,6 @@
 from sklearn.model_selection import StratifiedKFold
 from dotmap import DotMap
-from utils.utils import mkdir_if_not_exist
+from utils.utils import mkdir_if_not_exist, md5
 from utils.config_utils import DATA_PATH
 from utils.nlp_da import NlpDA
 import pandas as pd
@@ -18,18 +18,38 @@ class DataFountain529SentaDataProcessor(object):
         self.train_data_path = os.path.join(DATA_PATH, config.exp_name, config.train_filename)
         self.test_data_path = os.path.join(DATA_PATH, config.exp_name, config.test_filename)
 
+        # 根据配置文件设置数据处理后的存储路径
+        self._set_processed_data_path(config)
+
+        self.da_options = config.data_process.data_augmentation
+        self.enable_text_clean = config.data_process.enable_text_clean
+        self.sp_options = config.data_process.data_split_options
+
+        self.enable_da = bool(self.da_options)
+
+        # 数据集划分配置
+        self.k_fold = config.k_fold
+        self.random_state = config.random_state
+        self.dev_prop = config.dev_prop
+
+        self.logger = config.logger
+
+    def _set_processed_data_path(self, config):
+        data_process_config = config.data_process
+        unique_dir_name = md5(data_process_config.toDict())
+
         # 数据增强路径
-        data_augmentation_path = os.path.join(DATA_PATH, config.exp_name, "data_augmentation")
-        mkdir_if_not_exist(data_augmentation_path)
-        self.da_train_data_path = os.path.join(data_augmentation_path, "train.csv")
-        self.da_test_data_path = os.path.join(data_augmentation_path, "test.csv")
+        self.data_augmentation_path = os.path.join(DATA_PATH, config.exp_name, "data_augmentation", unique_dir_name)
+        mkdir_if_not_exist(self.data_augmentation_path)
+        self.da_train_data_path = os.path.join(self.data_augmentation_path, "train.csv")
+        self.da_test_data_path = os.path.join(self.data_augmentation_path, "test.csv")
 
         # 处理后的数据集路径
-        processed_path = os.path.join(DATA_PATH, config.exp_name, "processed")
-        mkdir_if_not_exist(processed_path)
-        self.train_path = os.path.join(processed_path, "train_{}.csv")
-        self.dev_path = os.path.join(processed_path, "dev_{}.csv")
-        self.test_path = os.path.join(processed_path, "test.csv")
+        self.processed_path = os.path.join(DATA_PATH, config.exp_name, "processed", unique_dir_name)
+        mkdir_if_not_exist(self.processed_path)
+        self.train_path = os.path.join(self.processed_path, "train_{}.csv")
+        self.dev_path = os.path.join(self.processed_path, "dev_{}.csv")
+        self.test_path = os.path.join(self.processed_path, "test.csv")
 
         # 补充配置信息
         config.splits = {
@@ -38,17 +58,12 @@ class DataFountain529SentaDataProcessor(object):
             "test": self.test_path
         }
 
-        self.logger = config.logger
-        self.da_options = config.da_options
-        self.enable_da = bool(self.da_options)
-        self.enable_text_clean = config.enable_text_clean
-
-        # 数据集划分配置
-        self.k_fold = config.k_fold
-        self.random_state = config.random_state
-        self.dev_prop = config.dev_prop
-
     def process(self):
+        # 文件夹非空，跳过处理
+        if os.listdir(self.processed_path):
+            self.logger.info("skip data process")
+            return
+
         # 数据增强
         if self.enable_da:
             self._data_augmentation()
@@ -60,6 +75,11 @@ class DataFountain529SentaDataProcessor(object):
         self._test_dataset_save()
 
     def _data_augmentation(self):
+        # 文件夹非空，跳过处理
+        if os.listdir(self.data_augmentation_path):
+            self.logger.info("skip data augmentation")
+            return
+
         # 数据增强对象
         nlp_da = NlpDA(**self.da_options)
 

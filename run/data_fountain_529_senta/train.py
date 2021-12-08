@@ -1,9 +1,5 @@
 from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
-from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
 from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
-from model.data_fountain_529_senta import DataFountain529SentaBertClsSeqMeanMaxModel
-from model.data_fountain_529_senta import DataFountain529SentaSkepHiddenFusionModel
-from model.data_fountain_529_senta import DataFountain529SentaSkepClsSeqMeanMaxModel
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from trainer.data_fountain_529_senta import DataFountain529SentaTrainer
@@ -13,13 +9,11 @@ import os
 
 
 def train():
-    config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
+    config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"), "train")
 
     # 原始数据预处理
     data_processor = DataFountain529SentaDataProcessor(config)
-    data_processor.data_augmentation()
     data_processor.process()
-    config = data_processor.config
 
     folds = [1] if config.k_fold == 0 else range(1, config.k_fold + 1)
     for fold in folds:
@@ -51,18 +45,6 @@ def get_model_and_tokenizer(model_name: str, config: DotMap):
     elif model_name == "bert_hidden_fusion":
         model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
-    elif model_name == "bert_cls_seq_mean_max":
-        model = DataFountain529SentaBertClsSeqMeanMaxModel.from_pretrained("bert-base-chinese", config=config)
-        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
-    elif model_name == "skep_base":
-        model = SkepForSequenceClassification.from_pretrained("skep_ernie_1.0_large_ch", num_classes=config.num_classes)
-        tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
-    elif model_name == "skep_hidden_fusion":
-        model = DataFountain529SentaSkepHiddenFusionModel.from_pretrained("skep_ernie_1.0_large_ch", config=config)
-        tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
-    elif model_name == "skep_cls_seq_mean_max":
-        model = DataFountain529SentaSkepClsSeqMeanMaxModel.from_pretrained("skep_ernie_1.0_large_ch", config=config)
-        tokenizer = SkepTokenizer.from_pretrained("skep_ernie_1.0_large_ch")
     else:
         logger.error("load model error: {}.".format(model_name))
     return model, tokenizer

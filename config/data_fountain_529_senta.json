@@ -13,23 +13,28 @@
 
   "train": {
     "model_name": "",
-
     "batch_size": 64,
-    "epochs": 4,
-    "learning_rate": 2e-5,
-
-    "loss_func": "focal_loss",
-
+    "epochs": 5,
+    "learning_rate": 1e-5,
+    "loss_func": "ce_loss",
+    "data_process": {
+      "enable_text_clean": false,
+      "data_augmentation": [],
+      "data_split_options": {}
+    },
     "k_fold": 10,
     "random_state": 2021,
 
     "baseline": {
-      "k_fold": 0,
-      "dev_prop": 0.2,
       "model_name": "bert_baseline",
-      "da_options": [],
-      "enable_text_clean": true,
-      "loss_func": "ce_loss"
+      "loss_func": "ce_loss",
+      "data_process": {
+        "enable_text_clean": false,
+        "data_augmentation": [],
+        "data_split_options": {}
+      },
+      "k_fold": 0,
+      "dev_prop": 0.2
     }
   },
 

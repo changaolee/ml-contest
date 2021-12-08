@@ -2,6 +2,8 @@ import os
 import shutil
 import logging
 import paddle
+import json
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -70,3 +72,9 @@ def load_label_vocab(labels: list) -> dict:
     for i, label in enumerate(labels):
         vocab[label] = i
     return vocab
+
+
+def md5(data):
+    if isinstance(data, dict):
+        data = json.dumps(data)
+    return hashlib.md5(data.encode(encoding='utf-8')).hexdigest()
