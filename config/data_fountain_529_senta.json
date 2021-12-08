@@ -8,6 +8,9 @@
   "model_config": {
     "bert_baseline": {
       "max_seq_len": 200
+    },
+    "bert_base": {
+      "max_seq_len": 200
     }
   },
 

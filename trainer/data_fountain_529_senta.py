@@ -31,6 +31,8 @@ class DataFountain529SentaTrainer(object):
                  train_ds: MapDataset,
                  dev_ds: MapDataset,
                  config: DotMap):
+        if config.model_name not in config.model_config:
+            raise RuntimeError("current model: {} not configured".format(config.model_name))
         self.model = model
         self.tokenizer = tokenizer
         self.train_ds = train_ds
