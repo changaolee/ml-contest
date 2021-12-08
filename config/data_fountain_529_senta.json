@@ -2,42 +2,37 @@
   "exp_name": "data_fountain_529_senta",
   "train_filename": "train_data_public.csv",
   "test_filename": "test_public.csv",
-
   "num_classes": 3,
-
   "model_config": {
     "bert_baseline": {
       "max_seq_len": 200
     }
   },
-
   "train": {
     "model_name": "bert_base",
-    "batch_size": 64,
-    "epochs": 5,
-    "learning_rate": 1e-5,
     "loss_func": "ce_loss",
     "data_process": {
       "enable_text_clean": false,
       "data_augmentation": [],
-      "data_split_options": {}
+      "data_split_options": {},
+      "k_fold": 10,
+      "random_state": 2021
     },
-    "k_fold": 10,
-    "random_state": 2021,
-
+    "batch_size": 64,
+    "epochs": 5,
+    "learning_rate": 1e-5,
     "baseline": {
       "model_name": "bert_baseline",
       "loss_func": "ce_loss",
       "data_process": {
         "enable_text_clean": false,
         "data_augmentation": [],
-        "data_split_options": {}
-      },
-      "k_fold": 0,
-      "dev_prop": 0.2
+        "data_split_options": {},
+        "k_fold": 0,
+        "dev_prop": 0.2
+      }
     }
   },
-
   "predict": {
     "batch_size": 8,
     "models": []

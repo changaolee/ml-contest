@@ -21,16 +21,14 @@ class DataFountain529SentaDataProcessor(object):
         # 根据配置文件设置数据处理后的存储路径
         self._set_processed_data_path(config)
 
+        # 数据处理配置
+        self.k_fold = config.data_process.k_fold
+        self.random_state = config.data_process.random_state
+        self.dev_prop = config.data_process.dev_prop
         self.da_options = config.data_process.data_augmentation
         self.enable_text_clean = config.data_process.enable_text_clean
         self.sp_options = config.data_process.data_split_options
-
         self.enable_da = bool(self.da_options)
-
-        # 数据集划分配置
-        self.k_fold = config.k_fold
-        self.random_state = config.random_state
-        self.dev_prop = config.dev_prop
 
         self.logger = config.logger
 
