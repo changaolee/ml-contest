@@ -217,7 +217,7 @@ class DataFountain529SentaTrainer(object):
             acc = self.eval_acc_metric.accumulate()
 
         self.logger.info("「%d/%d」eval loss: %.5f, kappa: %.5f, acc: %.5f"
-                         % (self.fold, self.total_fold, float(np.mean(losses)), kappa, acc))
+                         % (self.fold, self.total_fold - 1, float(np.mean(losses)), kappa, acc))
         self.model.train()
         self.eval_metric.reset()
         self.eval_acc_metric.reset()
