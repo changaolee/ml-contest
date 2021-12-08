@@ -129,8 +129,9 @@ class DataFountain529SentaDataProcessor(object):
                                 da_text = self.text_clean(da_text)
                             rows.append([da_text, cur_y])
                     else:
+                        text = cur_X["text"]
                         if self.enable_text_clean:
-                            text = self.text_clean(cur_X["text"])
+                            text = self.text_clean(text)
                         rows.append([text, cur_y])
                 random.shuffle(rows)
                 train_writer.writerows(rows)
@@ -142,8 +143,9 @@ class DataFountain529SentaDataProcessor(object):
 
                 for i in range(len(dev_idx)):
                     cur_X, cur_y = X.iloc[dev_idx[i]], y.iloc[dev_idx[i]]
+                    text = cur_X["text"]
                     if self.enable_text_clean:
-                        text = self.text_clean(cur_X["text"])
+                        text = self.text_clean(text)
                     dev_writer.writerow([text, cur_y])
 
             if self.k_fold == 0:
