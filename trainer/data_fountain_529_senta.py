@@ -160,8 +160,7 @@ class DataFountain529SentaTrainer(object):
                         global_step += 1
                         self.logger.info(
                             "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, acc: %.5f, speed: %.2f step/s"
-                            % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa, acc,
-                               10 / (time.time() - tic_train)))
+                            % (self.fold, self.total_fold - 1, global_step, epoch, step, loss, kappa, acc, 1 / (time.time() - tic_train)))
                         tic_train = time.time()
 
                         train_writer.add_scalar(tag="kappa", step=global_step, value=kappa)
