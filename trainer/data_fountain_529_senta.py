@@ -158,16 +158,15 @@ class DataFountain529SentaTrainer(object):
                         acc = self.acc_metric.accumulate()
 
                         global_step += 1
-                        if global_step % 10 == 0:
-                            self.logger.info(
-                                "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, acc: %.5f, speed: %.2f step/s"
-                                % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa, acc,
-                                   10 / (time.time() - tic_train)))
-                            tic_train = time.time()
+                        self.logger.info(
+                            "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, kappa: %.5f, acc: %.5f, speed: %.2f step/s"
+                            % (self.fold, self.total_fold, global_step, epoch, step, loss, kappa, acc,
+                               10 / (time.time() - tic_train)))
+                        tic_train = time.time()
 
-                            train_writer.add_scalar(tag="kappa", step=global_step, value=kappa)
-                            train_writer.add_scalar(tag="acc", step=global_step, value=acc)
-                            train_writer.add_scalar(tag="loss", step=global_step, value=loss)
+                        train_writer.add_scalar(tag="kappa", step=global_step, value=kappa)
+                        train_writer.add_scalar(tag="acc", step=global_step, value=acc)
+                        train_writer.add_scalar(tag="loss", step=global_step, value=loss)
 
                         # 反向梯度回传，更新参数
                         loss.backward()
