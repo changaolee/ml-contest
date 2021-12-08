@@ -1,9 +1,5 @@
 from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
-from paddlenlp.transformers import SkepTokenizer, SkepForSequenceClassification
 from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
-from model.data_fountain_529_senta import DataFountain529SentaBertClsSeqMeanMaxModel
-from model.data_fountain_529_senta import DataFountain529SentaSkepHiddenFusionModel
-from model.data_fountain_529_senta import DataFountain529SentaSkepClsSeqMeanMaxModel
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from infer.data_fountain_529_senta import DataFountain529SentaInfer
@@ -16,13 +12,11 @@ import os
 
 
 def predict():
-    config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"))
+    config = get_config(os.path.join(CONFIG_PATH, "data_fountain_529_senta.json"), "predict")
 
     # 原始数据预处理
     data_processor = DataFountain529SentaDataProcessor(config)
-    data_processor.data_augmentation()
     data_processor.process()
-    config = data_processor.config
 
     k_fold_result = []
     k_fold_models = {
@@ -42,7 +36,7 @@ def predict():
         [test_ds] = DataFountain529SentaDataset(config).load_data(splits=['test'], lazy=False)
 
         # 加载 model 和 tokenizer
-        model, tokenizer = get_model_and_tokenizer(config.model_name, config)
+        model, tokenizer = get_model_and_tokenizer(config)
 
         # 获取推断器
         config.model_path = os.path.join(config.ckpt_dir, config.model_name, "fold_{}/{}".format(fold, model_path))
@@ -101,9 +95,8 @@ def merge_k_fold_result(k_fold_result):
     return result
 
 
-def get_model_and_tokenizer(model_name: str, config: DotMap):
-    model, tokenizer = None, None
-    logger = config.logger
+def get_model_and_tokenizer(config: DotMap):
+    model_name = config.model_name
     if model_name == "bert_base":
         model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
@@ -111,7 +104,7 @@ def get_model_and_tokenizer(model_name: str, config: DotMap):
         model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     else:
-        logger.error("load model error: {}.".format(model_name))
+        raise RuntimeError("load model error: {}.".format(model_name))
     return model, tokenizer
 
 

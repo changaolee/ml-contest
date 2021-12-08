@@ -12,7 +12,7 @@
   },
 
   "train": {
-    "model_name": "",
+    "model_name": "bert_base",
     "batch_size": 64,
     "epochs": 5,
     "learning_rate": 1e-5,

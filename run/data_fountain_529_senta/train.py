@@ -15,7 +15,7 @@ def train():
     data_processor = DataFountain529SentaDataProcessor(config)
     data_processor.process()
 
-    folds = [1] if config.k_fold == 0 else range(1, config.k_fold + 1)
+    folds = [0] if config.k_fold == 0 else range(config.k_fold)
     for fold in folds:
         config.fold = fold
 
@@ -25,7 +25,7 @@ def train():
         )
 
         # 加载 model 和 tokenizer
-        model, tokenizer = get_model_and_tokenizer(config.model_name, config)
+        model, tokenizer = get_model_and_tokenizer(config)
 
         # 获取训练器
         trainer = DataFountain529SentaTrainer(
@@ -36,9 +36,8 @@ def train():
         trainer.train()
 
 
-def get_model_and_tokenizer(model_name: str, config: DotMap):
-    model, tokenizer = None, None
-    logger = config.logger
+def get_model_and_tokenizer(config: DotMap):
+    model_name = config.model_name
     if model_name == "bert_base":
         model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
@@ -46,7 +45,7 @@ def get_model_and_tokenizer(model_name: str, config: DotMap):
         model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     else:
-        logger.error("load model error: {}.".format(model_name))
+        raise RuntimeError("load model error: {}.".format(model_name))
     return model, tokenizer
 
 
