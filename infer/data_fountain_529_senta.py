@@ -55,7 +55,7 @@ class DataFountain529SentaInfer(object):
             self.model.set_dict(state_dict)
             self.logger.info("Loaded parameters from {}".format(model_params_path))
         else:
-            self.logger.error("Loaded parameters error from {}".format(model_params_path))
+            raise RuntimeError("Loaded parameters error from {}".format(model_params_path))
 
     @paddle.no_grad()
     def predict(self):

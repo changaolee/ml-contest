@@ -23,7 +23,10 @@
     "data_process": {
       "enable_text_clean": false,
       "data_augmentation": [],
-      "data_split_options": {}
+      "data_split_options": {
+        "model_name": "bert_baseline",
+        "model_params_path": "/home/aistudio/work/checkpoints/baseline/model.pdparams"
+      }
     },
     "k_fold": 10,
     "random_state": 2021,
@@ -43,6 +46,7 @@
 
   "predict": {
     "batch_size": 8,
-    "models": []
+    "models": [],
+    "strategy": ""
   }
 }

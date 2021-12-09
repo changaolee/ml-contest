@@ -1,11 +1,9 @@
-from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification
-from model.data_fountain_529_senta import DataFountain529SentaBertHiddenFusionModel
 from data_process.data_fountain_529_senta import DataFountain529SentaDataProcessor
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
+from model.data_fountain_529_senta import get_model_and_tokenizer
 from infer.data_fountain_529_senta import DataFountain529SentaInfer
 from utils.config_utils import get_config, CONFIG_PATH
 from utils.utils import mkdir_if_not_exist
-from dotmap import DotMap
 import numpy as np
 import csv
 import os
@@ -93,19 +91,6 @@ def merge_k_fold_result(k_fold_result):
         label = np.argmax(probs)
         result.append([qid, label])
     return result
-
-
-def get_model_and_tokenizer(config: DotMap):
-    model_name = config.model_name
-    if model_name == "bert_base":
-        model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
-        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
-    elif model_name == "bert_hidden_fusion":
-        model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
-        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
-    else:
-        raise RuntimeError("load model error: {}.".format(model_name))
-    return model, tokenizer
 
 
 if __name__ == "__main__":

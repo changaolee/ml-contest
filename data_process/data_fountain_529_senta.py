@@ -1,3 +1,6 @@
+from dataset.data_fountain_529_senta import DataFountain529SentaDataset
+from model.data_fountain_529_senta import get_model_and_tokenizer
+from infer.data_fountain_529_senta import DataFountain529SentaInfer
 from sklearn.model_selection import StratifiedKFold
 from dotmap import DotMap
 from utils.utils import mkdir_if_not_exist, md5
@@ -14,6 +17,8 @@ import re
 class DataFountain529SentaDataProcessor(object):
 
     def __init__(self, config: DotMap):
+        self.config = config
+
         # 原始数据集路径
         self.train_data_path = os.path.join(DATA_PATH, config.exp_name, config.train_filename)
         self.test_data_path = os.path.join(DATA_PATH, config.exp_name, config.test_filename)
@@ -26,6 +31,7 @@ class DataFountain529SentaDataProcessor(object):
         self.sp_options = config.data_process.data_split_options
 
         self.enable_da = bool(self.da_options)
+        self.enable_sp = bool(self.sp_options)
 
         # 数据集划分配置
         self.k_fold = config.k_fold
@@ -39,6 +45,15 @@ class DataFountain529SentaDataProcessor(object):
         unique_dir_name = md5({**data_process_config, **{"k_fold": config.k_fold,
                                                          "random_state": config.random_state,
                                                          "dev_prop": config.dev_prop}})
+        # 数据难度评估结果存储路径
+        self.data_difficulty_assessment_path = os.path.join(
+            DATA_PATH, config.exp_name, "data_difficulty_assessment", unique_dir_name
+        )
+        mkdir_if_not_exist(self.data_difficulty_assessment_path)
+        self.assessed_path = os.path.join(self.data_difficulty_assessment_path, "assessed_data.csv")
+        self.data_difficulty_score_path = os.path.join(
+            self.data_difficulty_assessment_path, "data_difficulty_score.json"
+        )
 
         # 数据增强路径
         self.data_augmentation_path = os.path.join(DATA_PATH, config.exp_name, "data_augmentation", unique_dir_name)
@@ -57,7 +72,8 @@ class DataFountain529SentaDataProcessor(object):
         config.splits = {
             "train": self.train_path,
             "dev": self.dev_path,
-            "test": self.test_path
+            "test": self.test_path,
+            "assessed": self.assessed_path,
         }
 
     def process(self):
@@ -65,6 +81,10 @@ class DataFountain529SentaDataProcessor(object):
         if os.listdir(self.processed_path):
             self.logger.info("skip data process")
             return
+
+        # 数据难度评估
+        if self.enable_sp:
+            self._data_difficulty_assessment()
 
         # 数据增强
         if self.enable_da:
@@ -75,6 +95,43 @@ class DataFountain529SentaDataProcessor(object):
 
         # 测试集保存
         self._test_dataset_save()
+
+    def _data_difficulty_assessment(self):
+        # 文件夹非空，跳过处理
+        if os.listdir(self.data_difficulty_assessment_path):
+            self.logger.info("skip data difficulty assessment")
+            return
+
+        # 待评估数据集保存
+        self._assessed_dataset_save()
+
+        # 获取待评估数据集
+        [assessed_ds] = DataFountain529SentaDataset(self.config).load_data(splits=['assessed'], lazy=False)
+
+        # 加载 model 和 tokenizer
+        self.model_name = self.sp_options.model_name
+        model, tokenizer = get_model_and_tokenizer(self.config)
+
+        # 获取推断器
+        self.config.model_path = self.sp_options.model_params_path
+        infer = DataFountain529SentaInfer(model, tokenizer=tokenizer, test_ds=assessed_ds, config=self.config)
+
+        # 开始预测
+        result = infer.predict()
+        print(result)
+
+    def _assessed_dataset_save(self):
+        df = pd.read_csv(self.train_data_path, encoding="utf-8")
+
+        with open(self.assessed_path, "w", encoding="utf-8") as assessed_f:
+            assessed_writer = csv.writer(assessed_f)
+            assessed_writer.writerow(["id", "text", "label"])
+
+            rows = []
+            for idx, line in df.iterrows():
+                _id, text, label = line.get("id", ""), line.get("text", ""), line.get("class", "")
+                rows.append([_id, text, label])
+            assessed_writer.writerows(rows)
 
     def _data_augmentation(self):
         # 文件夹非空，跳过处理

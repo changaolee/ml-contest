@@ -1,6 +1,19 @@
-from paddlenlp.transformers import BertPretrainedModel
+from paddlenlp.transformers import BertTokenizer, BertForSequenceClassification, BertPretrainedModel
 from dotmap import DotMap
 import paddle
+
+
+def get_model_and_tokenizer(config: DotMap):
+    model_name = config.model_name
+    if model_name == "bert_base":
+        model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
+        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    elif model_name == "bert_hidden_fusion":
+        model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
+        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    else:
+        raise RuntimeError("load model error: {}.".format(model_name))
+    return model, tokenizer
 
 
 class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
