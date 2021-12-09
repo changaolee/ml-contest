@@ -25,7 +25,7 @@
       "data_augmentation": [],
       "data_split_options": {}
     },
-    "k_fold": 5,
+    "k_fold": 10,
     "random_state": 2021,
 
     "baseline": {
