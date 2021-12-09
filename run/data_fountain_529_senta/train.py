@@ -13,7 +13,7 @@ def train(opt):
 
     # baseline 配置重写
     if opt.baseline:
-        config = DotMap({**config, **config.baseline})
+        config = DotMap({**config.toDict(), **config.baseline.toDict()})
 
     # 原始数据预处理
     data_processor = DataFountain529SentaDataProcessor(config)

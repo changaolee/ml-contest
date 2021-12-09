@@ -42,9 +42,9 @@ class DataFountain529SentaDataProcessor(object):
 
     def _set_processed_data_path(self, config):
         data_process_config = config.data_process
-        unique_dir_name = md5({**data_process_config, **{"k_fold": config.k_fold,
-                                                         "random_state": config.random_state,
-                                                         "dev_prop": config.dev_prop}})
+        unique_dir_name = md5({**data_process_config.toDict(), **{"k_fold": config.k_fold,
+                                                                  "random_state": config.random_state,
+                                                                  "dev_prop": config.dev_prop}})
         # 数据难度评估结果存储路径
         self.data_difficulty_assessment_path = os.path.join(
             DATA_PATH, config.exp_name, "data_difficulty_assessment", unique_dir_name
