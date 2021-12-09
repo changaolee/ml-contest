@@ -34,11 +34,11 @@ def predict():
         [test_ds] = DataFountain529SentaDataset(config).load_data(splits=['test'], lazy=False)
 
         # 加载 model 和 tokenizer
-        model, tokenizer = get_model_and_tokenizer(config)
+        model, tokenizer = get_model_and_tokenizer(config.model_name, config)
 
         # 获取推断器
-        config.model_path = os.path.join(config.ckpt_dir, config.model_name, "fold_{}/{}".format(fold, model_path))
-        infer = DataFountain529SentaInfer(model, tokenizer=tokenizer, test_ds=test_ds, config=config)
+        model_path = os.path.join(config.ckpt_dir, config.model_name, "fold_{}/{}/model.pdparams".format(fold, model_path))
+        infer = DataFountain529SentaInfer(model, tokenizer=tokenizer, test_ds=test_ds, config=config, model_params_path=model_path)
 
         # 开始预测
         fold_result = infer.predict()

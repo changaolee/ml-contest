@@ -8,7 +8,6 @@ from utils.utils import create_data_loader
 import paddle.nn.functional as F
 import numpy as np
 import paddle
-import os
 
 
 class DataFountain529SentaInfer(object):
@@ -17,21 +16,22 @@ class DataFountain529SentaInfer(object):
                  model: nn.Layer,
                  tokenizer: PretrainedTokenizer,
                  test_ds: MapDataset,
-                 config: DotMap):
+                 config: DotMap,
+                 model_params_path: str):
         self.model = model
         self.tokenizer = tokenizer
         self.test_ds = test_ds
-        self.config = config
-        self.logger = self.config.logger
-        self._gen_data_loader()
-        self._load_model()
+        self.m_conf = config.model_config[config.model_name]
+        self.logger = config.logger
+        self._gen_data_loader(config)
+        self._load_model(model_params_path)
 
-    def _gen_data_loader(self):
+    def _gen_data_loader(self, config: DotMap):
         # 将数据处理成模型可读入的数据格式
         trans_func = partial(
             self.convert_example,
             tokenizer=self.tokenizer,
-            max_seq_len=self.config.max_seq_len)
+            max_seq_len=self.m_conf.max_seq_len)
 
         batchify_fn = lambda samples, fn=Tuple(
             Pad(axis=0, pad_val=self.tokenizer.pad_token_id),  # input_ids
@@ -42,20 +42,18 @@ class DataFountain529SentaInfer(object):
         self.test_data_loader = create_data_loader(
             self.test_ds,
             mode='test',
-            batch_size=self.config.batch_size,
+            batch_size=config.batch_size,
             batchify_fn=batchify_fn,
             trans_fn=trans_func)
 
-    def _load_model(self):
-        model_params_path = self.config.model_path if os.path.isfile(self.config.model_path) \
-            else os.path.join(self.config.model_path, "model.pdparams")
-        if os.path.isfile(model_params_path):
+    def _load_model(self, model_params_path):
+        try:
             # 加载模型参数
             state_dict = paddle.load(model_params_path)
             self.model.set_dict(state_dict)
             self.logger.info("Loaded parameters from {}".format(model_params_path))
-        else:
-            raise RuntimeError("Loaded parameters error from {}".format(model_params_path))
+        except Exception as e:
+            raise RuntimeError("Loaded parameters error from {}: {}".format(model_params_path, e))
 
     @paddle.no_grad()
     def predict(self):

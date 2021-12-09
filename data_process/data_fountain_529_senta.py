@@ -109,12 +109,14 @@ class DataFountain529SentaDataProcessor(object):
         [assessed_ds] = DataFountain529SentaDataset(self.config).load_data(splits=['assessed'], lazy=False)
 
         # 加载 model 和 tokenizer
-        self.model_name = self.sp_options.model_name
-        model, tokenizer = get_model_and_tokenizer(self.config)
+        model, tokenizer = get_model_and_tokenizer(self.sp_options.model_name, self.config)
 
         # 获取推断器
-        self.config.model_path = self.sp_options.model_params_path
-        infer = DataFountain529SentaInfer(model, tokenizer=tokenizer, test_ds=assessed_ds, config=self.config)
+        infer = DataFountain529SentaInfer(model,
+                                          tokenizer=tokenizer,
+                                          test_ds=assessed_ds,
+                                          config=self.config,
+                                          model_params_path=self.sp_options.model_params_path)
 
         # 开始预测
         result = infer.predict()
