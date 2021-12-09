@@ -183,11 +183,11 @@ class DataFountain529SentaTrainer(object):
                             dev_writer.add_scalar(tag="acc", step=global_step, value=acc_dev)
                             dev_writer.add_scalar(tag="loss", step=global_step, value=loss_dev)
 
-                            # 保存当前模型参数等
-                            if global_step >= 100:
-                                save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
-                                mkdir_if_not_exist(save_dir)
-                                paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
+                            # # 保存当前模型参数等
+                            # if global_step >= 100:
+                            #     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
+                            #     mkdir_if_not_exist(save_dir)
+                            #     paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len=512):
