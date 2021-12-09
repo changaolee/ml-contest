@@ -4,7 +4,7 @@ import paddle
 
 
 def get_model_and_tokenizer(model_name: str, config: DotMap):
-    if model_name == "bert_base":
+    if model_name in ["bert_base", "bert_baseline"]:
         model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     elif model_name == "bert_hidden_fusion":
