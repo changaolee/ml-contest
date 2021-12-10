@@ -77,11 +77,6 @@ class DataFountain529SentaDataProcessor(object):
         }
 
     def process(self):
-        # 文件夹非空，跳过处理
-        if os.listdir(self.processed_path):
-            self.logger.info("skip data process")
-            return
-
         # 数据难度评估
         if self.enable_sp:
             self._data_difficulty_assessment()
@@ -97,8 +92,8 @@ class DataFountain529SentaDataProcessor(object):
         self._test_dataset_save()
 
     def _data_difficulty_assessment(self):
-        # 文件夹非空，跳过处理
-        if os.listdir(self.data_difficulty_assessment_path):
+        # 相应文件都存在，跳过处理
+        if os.path.isfile(self.assessed_path) and os.path.isfile(self.data_difficulty_score_path):
             self.logger.info("skip data difficulty assessment")
             return
 
@@ -112,14 +107,14 @@ class DataFountain529SentaDataProcessor(object):
         model, tokenizer = get_model_and_tokenizer(self.sp_options.model_name, self.config)
 
         # 获取推断器
-        infer = DataFountain529SentaInfer(model,
-                                          tokenizer=tokenizer,
-                                          test_ds=assessed_ds,
-                                          config=self.config,
-                                          model_params_path=self.sp_options.model_params_path)
+        model_params_path = self.sp_options.model_params_path
+        infer = DataFountain529SentaInfer(
+            model, tokenizer=tokenizer, test_ds=assessed_ds, config=self.config, model_params_path=model_params_path)
 
         # 开始预测
         result = infer.predict()
+
+        # TODO: 选择真实标签的概率
         print(result)
 
     def _assessed_dataset_save(self):
@@ -136,8 +131,8 @@ class DataFountain529SentaDataProcessor(object):
             assessed_writer.writerows(rows)
 
     def _data_augmentation(self):
-        # 文件夹非空，跳过处理
-        if os.listdir(self.data_augmentation_path):
+        # 相应文件都存在，跳过处理
+        if os.path.isfile(self.da_train_data_path) and os.path.isfile(self.da_test_data_path):
             self.logger.info("skip data augmentation")
             return
 

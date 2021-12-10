@@ -10,6 +10,9 @@ def get_model_and_tokenizer(model_name: str, config: DotMap):
     elif model_name == "bert_hidden_fusion":
         model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+    elif model_name == "bert_cls_seq_mean_max":
+        model = DataFountain529SentaBertClsSeqMeanMaxModel.from_pretrained("bert-base-chinese", config=config)
+        tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     else:
         raise RuntimeError("load model error: {}.".format(model_name))
     return model, tokenizer
