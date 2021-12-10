@@ -131,3 +131,6 @@ dmypy.json
 .idea
 *.csv
 /experiment/
+/data/data_fountain_529_senta/data_augmentation/
+/data/data_fountain_529_senta/data_difficulty_assessment/
+/data/data_fountain_529_senta/processed/
