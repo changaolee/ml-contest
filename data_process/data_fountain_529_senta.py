@@ -1,3 +1,5 @@
+import json
+
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from model.data_fountain_529_senta import get_model_and_tokenizer
 from infer.data_fountain_529_senta import DataFountain529SentaInfer
@@ -114,8 +116,16 @@ class DataFountain529SentaDataProcessor(object):
         # 开始预测
         result = infer.predict()
 
-        # TODO: 选择真实标签的概率
-        print(result)
+        # 提取数据难度打分（预测概率，值越小难度越大）
+        difficulty_score = {}
+        df = pd.read_csv(self.assessed_path, encoding="utf-8")
+        for qid, probs in result:
+            label = df.loc[df["id"] == qid].iloc[0]["label"]
+            difficulty_score[qid] = probs[int(label)]
+
+        # 保存数据难度打分
+        with open(self.data_difficulty_score_path, "w", encoding="utf-8") as score_f:
+            json.dump(difficulty_score, score_f)
 
     def _assessed_dataset_save(self):
         df = pd.read_csv(self.train_data_path, encoding="utf-8")
