@@ -179,7 +179,8 @@ class DataFountain529SentaDataProcessor(object):
             def _get_difficulty_class(_class, _score):
                 return int("{}{}".format(_class, int(_score * 10)))
 
-            difficulty_score = json.load(self.data_difficulty_score_path)
+            with open(self.data_difficulty_score_path, "r", encoding="utf-8") as difficulty_score_f:
+                difficulty_score = json.load(difficulty_score_f)
             df["difficulty_class"] = df.apply(lambda x: _get_difficulty_class(
                 x["class"], difficulty_score[x["id"]]
             ), axis=1)
