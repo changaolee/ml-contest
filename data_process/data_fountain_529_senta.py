@@ -177,7 +177,7 @@ class DataFountain529SentaDataProcessor(object):
 
         if self.enable_sp:
             def _get_difficulty_class(_class, _score):
-                return int("{}{}".format(_class, int(_score * 10)))
+                return int("{}{}".format(_class, int(_score * 10) // 2))
 
             with open(self.data_difficulty_score_path, "r", encoding="utf-8") as difficulty_score_f:
                 difficulty_score = json.load(difficulty_score_f)
