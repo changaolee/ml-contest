@@ -201,7 +201,7 @@ class DataFountain529SentaDataProcessor(object):
                     cur_X, cur_y = X.iloc[train_idx[i]], y.iloc[train_idx[i]]
                     if self.enable_sp:
                         cur_y = cur_X["class"]
-                    if da_df:
+                    if da_df is not None:
                         da_texts = da_df.loc[da_df["id"] == cur_X["id"]]["text"].values.tolist()
                         for da_text in da_texts:
                             if self.enable_text_clean:
@@ -244,7 +244,7 @@ class DataFountain529SentaDataProcessor(object):
             rows = []
             for idx, line in df.iterrows():
                 _id, text = line.get("id", ""), line.get("text", "")
-                if da_df:
+                if da_df is not None:
                     da_texts = da_df.loc[da_df["id"] == _id]["text"].values.tolist()
                     for da_text in da_texts:
                         if self.enable_text_clean:
