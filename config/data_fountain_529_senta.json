@@ -19,7 +19,7 @@
     "batch_size": 64,
     "epochs": 5,
     "learning_rate": 1e-5,
-    "loss_func": "ce_loss",
+    "loss_func": "focal_loss",
     "data_process": {
       "enable_text_clean": false,
       "data_augmentation": [],
