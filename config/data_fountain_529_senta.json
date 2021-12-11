@@ -22,7 +22,11 @@
     "loss_func": "focal_loss",
     "data_process": {
       "enable_text_clean": true,
-      "data_augmentation": [],
+      "data_augmentation": {
+        "char_position_exchange_options": {
+          "create_num": 2, "change_rate": 0.3, "char_gram": 1
+        }
+      },
       "data_split_options": {
         "model_name": "bert_baseline",
         "model_params_path": "/home/aistudio/work/checkpoints/baseline/model.pdparams"
@@ -36,7 +40,7 @@
       "loss_func": "ce_loss",
       "data_process": {
         "enable_text_clean": false,
-        "data_augmentation": [],
+        "data_augmentation": {},
         "data_split_options": {}
       },
       "k_fold": 0,
