@@ -173,9 +173,19 @@ class DataFountain529SentaDataProcessor(object):
 
     def _train_dev_dataset_split(self):
         df = pd.read_csv(self.train_data_path, encoding="utf-8")
-        da_df = pd.read_csv(self.da_train_data_path, encoding="utf-8") if self.enable_da else None
+        X, y = df.drop(["class"], axis=1), df["class"]
 
-        X, y = df.drop(['class'], axis=1), df['class']
+        if self.enable_sp:
+            def _get_difficulty_class(_class, _score):
+                return int("{}{}".format(_class, int(_score * 10)))
+
+            difficulty_score = json.load(self.data_difficulty_score_path)
+            df["difficulty_class"] = df.apply(lambda x: _get_difficulty_class(
+                x["class"], difficulty_score[x["id"]]
+            ), axis=1)
+            X, y = df.drop(["difficulty_class"], axis=1), df["difficulty_class"]
+
+        da_df = pd.read_csv(self.da_train_data_path, encoding="utf-8") if self.enable_da else None
 
         k_fold = int(1 / self.dev_prop) if self.k_fold == 0 else self.k_fold
         skf = StratifiedKFold(n_splits=k_fold, shuffle=True, random_state=self.random_state).split(X, y)
@@ -188,6 +198,8 @@ class DataFountain529SentaDataProcessor(object):
                 rows = []
                 for i in range(len(train_idx)):
                     cur_X, cur_y = X.iloc[train_idx[i]], y.iloc[train_idx[i]]
+                    if self.enable_sp:
+                        cur_y = cur_X["class"]
                     if da_df:
                         da_texts = da_df.loc[da_df["id"] == cur_X["id"]]["text"].values.tolist()
                         for da_text in da_texts:
@@ -209,6 +221,8 @@ class DataFountain529SentaDataProcessor(object):
 
                 for i in range(len(dev_idx)):
                     cur_X, cur_y = X.iloc[dev_idx[i]], y.iloc[dev_idx[i]]
+                    if self.enable_sp:
+                        cur_y = cur_X["class"]
                     text = cur_X["text"]
                     if self.enable_text_clean:
                         text = self.text_clean(text)
