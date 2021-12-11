@@ -23,8 +23,8 @@
     "data_process": {
       "enable_text_clean": true,
       "data_augmentation": {
-        "random_delete_char_options": {
-          "create_num": 2, "change_rate": 0.1
+        "similar_word_options": {
+          "create_num": 2, "change_rate": 0.3
         }
       },
       "data_split_options": {
