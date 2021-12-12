@@ -1,7 +1,6 @@
-import json
-
 from utils.config_utils import get_config, CONFIG_PATH, DATA_PATH
 import pandas as pd
+import json
 import os
 
 
