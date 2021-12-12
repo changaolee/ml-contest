@@ -23,11 +23,10 @@
     "data_process": {
       "enable_text_clean": true,
       "data_augmentation": {
-        "char_position_exchange_options": {
-          "create_num": 2, "change_rate": 0.3, "char_gram": 1
-        },
-        "random_delete_char_options": {
-          "create_num": 2, "change_rate": 0.1
+        "translate_options": {
+          "domain": "finance",
+          "trans_path": [["zh", "en"], ["en", "zh"]],
+          "trans_cache_file": "/home/aistudio/work/trans.json"
         }
       },
       "data_split_options": {
