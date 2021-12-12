@@ -104,7 +104,8 @@ class NerLabeledEntityDA(object):
         assert len(data) == len(bio), "ner label len error"
 
         label_range = self._gen_label_range(data, bio)
-        for label, (start, end) in label_range.items():
+        for label, idx_range in label_range.items():
+            (start, end) = idx_range
             # TODO: replace
             print(label, data[start: end + 1])
         return []
