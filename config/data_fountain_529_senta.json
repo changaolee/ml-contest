@@ -25,7 +25,7 @@
       "data_augmentation": {
         "ner_labeled_entity_options": {
           "create_num": 2,
-          "change_rate": 0.3,
+          "change_prop": 0.3,
           "ner_labeled_entity_file_path": "/home/aistudio/work/entity.json"
         }
       },

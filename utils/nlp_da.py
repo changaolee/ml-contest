@@ -1,5 +1,6 @@
 from sdk.baidu_translate import BaiduTranslate
 import nlpcda
+import random
 import json
 
 
@@ -89,10 +90,10 @@ class NlpDA(object):
 
 
 class NerLabeledEntityDA(object):
-    def __init__(self, ner_labeled_entity_file_path: str, create_num: int, change_rate: float):
+    def __init__(self, ner_labeled_entity_file_path: str, create_num: int, change_prop: float):
         self._load_entity(ner_labeled_entity_file_path)
         self.create_num = create_num
-        self.change_rate = change_rate
+        self.change_prop = change_prop
 
     def _load_entity(self, path: str):
         with open(path, "r", encoding="utf-8") as f:
@@ -100,15 +101,24 @@ class NerLabeledEntityDA(object):
             self.all_labels = self.entity.keys()
 
     def replace(self, data: str, bio: str):
+        result = [data]
         data, bio = list(data), bio.split()
         assert len(data) == len(bio), "ner label len error"
 
         label_range = self._gen_label_range(data, bio)
         for label, idx_range in label_range.items():
+            if label not in self.all_labels:
+                continue
+            da_data, idx = [], 0
             for start, end in idx_range:
-                # TODO: replace
-                print(label, data[start: end + 1])
-        return []
+                da_data += data[idx: start]
+                if random.random() <= self.change_prop:
+                    da_data += [random.choice(self.entity[label])]
+                else:
+                    da_data += data[start: end + 1]
+                idx = end + 1
+            result.append("".join(da_data))
+        return result[:self.create_num]
 
     @staticmethod
     def _gen_label_range(data: str, bio: str):
