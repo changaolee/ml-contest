@@ -168,6 +168,7 @@ class DataFountain529SentaDataProcessor(object):
 
             for idx, line in test_df.iterrows():
                 _id, text = line.get("id", ""), line.get("text", "")
+                bio = line.get("BIO_anno", "")
                 for da_text in nlp_da.generate(text, {"bio": bio}):
                     test_writer.writerow([_id, da_text])
 

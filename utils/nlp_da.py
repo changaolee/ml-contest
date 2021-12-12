@@ -102,6 +102,8 @@ class NerLabeledEntityDA(object):
 
     def replace(self, data: str, bio: str):
         result = [data]
+        if not bio:
+            return result
         data, bio = list(data), bio.split()
         assert len(data) == len(bio), \
             "ner label len error, {} -> {}".format(''.join(data), ' '.join(bio))
