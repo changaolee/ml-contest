@@ -8,8 +8,8 @@ import os
 
 
 class BaiduTranslate(object):
-    BAIDU_APP_ID = "20181215000248582"
-    BAIDU_TRANS_SECRET_KEY = "h1QgNKc7SRDqwA3gVNpC"
+    BAIDU_APP_ID = ""
+    BAIDU_TRANS_SECRET_KEY = ""
 
     def __init__(self, domain, trans_path, trans_cache_file=None, app_id=None, secret_key=None):
         self.domain = domain
