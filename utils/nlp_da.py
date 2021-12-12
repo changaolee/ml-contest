@@ -103,7 +103,8 @@ class NerLabeledEntityDA(object):
     def replace(self, data: str, bio: str):
         result = [data]
         data, bio = list(data), bio.split()
-        assert len(data) == len(bio), "ner label len error"
+        assert len(data) == len(bio), \
+            "ner label len error, {} -> {}".format(''.join(data), ' '.join(bio))
 
         label_range = self._gen_label_range(data, bio)
         for label, idx_range in label_range.items():
@@ -117,6 +118,7 @@ class NerLabeledEntityDA(object):
                 else:
                     da_data += data[start: end + 1]
                 idx = end + 1
+            da_data += data[idx:]
             result.append("".join(da_data))
         return result[:self.create_num]
 
