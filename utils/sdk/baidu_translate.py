@@ -8,8 +8,8 @@ import os
 
 
 class BaiduTranslate(object):
-    BAIDU_APP_ID = ""
-    BAIDU_TRANS_SECRET_KEY = ""
+    BAIDU_APP_ID = "20181215000248582"
+    BAIDU_TRANS_SECRET_KEY = "h1QgNKc7SRDqwA3gVNpC"
 
     def __init__(self, domain, trans_path, trans_cache_file=None, app_id=None, secret_key=None):
         self.domain = domain
@@ -28,6 +28,7 @@ class BaiduTranslate(object):
             return self.trans_cache[text]
 
         raw_text = text
+        result_all = None
         try:
             for trans in self.trans_path:
                 from_lang, to_lang = trans
@@ -47,7 +48,7 @@ class BaiduTranslate(object):
 
                 time.sleep(0.1)
         except Exception as e:
-            print(e)
+            print(result_all, e)
         finally:
             if text != raw_text:
                 self.trans_cache[raw_text] = text
