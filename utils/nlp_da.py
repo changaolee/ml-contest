@@ -105,9 +105,9 @@ class NerLabeledEntityDA(object):
 
         label_range = self._gen_label_range(data, bio)
         for label, idx_range in label_range.items():
-            (start, end) = idx_range
-            # TODO: replace
-            print(label, data[start: end + 1])
+            for start, end in idx_range:
+                # TODO: replace
+                print(label, data[start: end + 1])
         return []
 
     @staticmethod
