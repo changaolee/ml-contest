@@ -18,7 +18,7 @@ class BaiduTranslate(object):
         self.trans_path = trans_path
         self.trans_cache_file = trans_cache_file
         self.trans_cache = {}
-        if os.path.isfile(trans_cache_file):
+        if trans_cache_file and os.path.isfile(trans_cache_file):
             with open(trans_cache_file, "r") as f:
                 self.trans_cache = json.load(f)
         self.client = http.client.HTTPConnection('api.fanyi.baidu.com')
