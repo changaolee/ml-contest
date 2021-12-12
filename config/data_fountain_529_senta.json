@@ -23,9 +23,15 @@
     "data_process": {
       "enable_text_clean": true,
       "data_augmentation": {
+        "char_position_exchange_options": {
+          "create_num": 2, "change_rate": 0.3, "char_gram": 1
+        },
+        "random_delete_char_options": {
+          "create_num": 2, "change_rate": 0.1
+        },
         "ner_labeled_entity_options": {
-          "create_num": 2,
-          "change_prop": 0.3,
+          "create_num": 3,
+          "change_prop": 0.5,
           "ner_labeled_entity_file_path": "/home/aistudio/work/entity.json"
         }
       },
