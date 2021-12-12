@@ -1,5 +1,6 @@
 from sdk.baidu_translate import BaiduTranslate
 import nlpcda
+import json
 
 
 class NlpDA(object):
@@ -18,15 +19,17 @@ class NlpDA(object):
                  random_delete_char_options: dict = None,
                  char_position_exchange_options: dict = None,
                  equivalent_char_options: dict = None,
-                 translate_options: dict = None):
+                 translate_options: dict = None,
+                 ner_labeled_entity_options: dict = None):
         """
         :param random_word_options: 随机实体替换参数
         :param similar_word_options: 随机同义词替换参数
         :param homophone_options: 随机近义近音词替换参数
         :param random_delete_char_options: 随机字删除参数
-        :param char_position_exchange_options 随机邻近字置换参数
-        :param equivalent_char_options 等价字替换
-        :param translate_options 回译参数
+        :param char_position_exchange_options: 随机邻近字置换参数
+        :param equivalent_char_options: 等价字替换
+        :param translate_options: 回译参数
+        :param ner_labeled_entity_options: 基于 NER 标注的实体替换参数
         :return:
         """
         if random_word_options:
@@ -43,8 +46,10 @@ class NlpDA(object):
             self.eqc = nlpcda.EquivalentChar(**equivalent_char_options)
         if translate_options:
             self.tra = BaiduTranslate(**translate_options)
+        if ner_labeled_entity_options:
+            self.nle = NerLabeledEntityDA(**ner_labeled_entity_options)
 
-    def generate(self, data):
+    def generate(self, data, extra=None):
         result = [data]
 
         # 随机实体替换
@@ -75,7 +80,55 @@ class NlpDA(object):
         if self.tra:
             result.append(self.tra.translate(data))
 
+        # 基于 NER 标注的实体替换
+        if self.nle:
+            bio = extra.get("bio", "")
+            result += self.nle.replace(data, bio)
+
         return list(set(filter(None, result)))
+
+
+class NerLabeledEntityDA(object):
+    def __init__(self, ner_labeled_entity_file_path: str, create_num: int, change_rate: float):
+        self._load_entity(ner_labeled_entity_file_path)
+        self.create_num = create_num
+        self.change_rate = change_rate
+
+    def _load_entity(self, path: str):
+        with open(path, "r", encoding="utf-8") as f:
+            self.entity = json.load(f)
+            self.all_labels = self.entity.keys()
+
+    def replace(self, data: str, bio: str):
+        data, bio = list(data), bio.split()
+        assert len(data) == len(bio), "ner label len error"
+
+        label_range = self._gen_label_range(data, bio)
+        for label, (start, end) in label_range.items():
+            # TODO: replace
+            print(label, data[start: end + 1])
+        return []
+
+    @staticmethod
+    def _gen_label_range(data: str, bio: str):
+        result = {}
+        cur_label, start, end = "", -1, -1
+        for i, (k, v) in enumerate(zip(data, bio)):
+            if v == 'O':
+                if cur_label:
+                    result[cur_label].append((start, end))
+                    cur_label, start, end = "", -1, -1
+                continue
+            prefix, label = v.split('-')
+            if prefix == 'B':
+                if cur_label:
+                    result[cur_label].append((start, end))
+                cur_label, start, end = label, i, i
+                if cur_label not in result:
+                    result[cur_label] = []
+            elif prefix == 'I':
+                end += 1
+        return result
 
 
 if __name__ == "__main__":

@@ -23,7 +23,7 @@
     "data_process": {
       "enable_text_clean": true,
       "data_augmentation": {
-        "ner_labeled_entity_replace_options": {
+        "ner_labeled_entity_options": {
           "create_num": 2,
           "change_rate": 0.3,
           "ner_labeled_entity_file_path": "/home/aistudio/work/entity.json"

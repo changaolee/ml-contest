@@ -1,5 +1,3 @@
-import json
-
 from dataset.data_fountain_529_senta import DataFountain529SentaDataset
 from model.data_fountain_529_senta import get_model_and_tokenizer
 from infer.data_fountain_529_senta import DataFountain529SentaInfer
@@ -11,6 +9,7 @@ from utils.nlp_da import NlpDA
 import pandas as pd
 import string
 import random
+import json
 import csv
 import os
 import re
@@ -157,7 +156,8 @@ class DataFountain529SentaDataProcessor(object):
 
             for idx, line in train_df.iterrows():
                 _id, text, label = line.get("id", ""), line.get("text", ""), line.get("class", "")
-                for da_text in nlp_da.generate(text):
+                bio = line.get("BIO_anno", "")
+                for da_text in nlp_da.generate(text, {"bio": bio}):
                     train_writer.writerow([_id, da_text, label])
 
         # 测试数据
@@ -168,7 +168,7 @@ class DataFountain529SentaDataProcessor(object):
 
             for idx, line in test_df.iterrows():
                 _id, text = line.get("id", ""), line.get("text", "")
-                for da_text in nlp_da.generate(text):
+                for da_text in nlp_da.generate(text, {"bio": bio}):
                     test_writer.writerow([_id, da_text])
 
     def _train_dev_dataset_split(self):
