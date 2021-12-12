@@ -23,7 +23,7 @@
     "data_process": {
       "enable_text_clean": true,
       "data_augmentation": {
-        "homophone_options": {
+        "equivalent_char_options": {
           "create_num": 2, "change_rate": 0.3
         }
       },
