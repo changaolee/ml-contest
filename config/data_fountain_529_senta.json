@@ -11,11 +11,14 @@
     },
     "bert_base": {
       "max_seq_len": 200
+    },
+    "bert_hidden_fusion": {
+      "max_seq_len": 200
     }
   },
 
   "train": {
-    "model_name": "bert_base",
+    "model_name": "bert_hidden_fusion",
     "batch_size": 128,
     "epochs": 5,
     "learning_rate": 1e-5,
