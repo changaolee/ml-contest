@@ -26,7 +26,8 @@ class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
     def __init__(self, bert, config: DotMap):
         super(DataFountain529SentaBertHiddenFusionModel, self).__init__()
         self.bert = bert
-        self.dropout = paddle.nn.Dropout(config.hidden_dropout_prob)
+        self.m_conf = config.model_config[config.model_name]
+        self.dropout = paddle.nn.Dropout(self.m_conf.hidden_dropout_prob)
         self.classifier = paddle.nn.layer.Linear(768, config.num_classes)
         self.layer_weights = self.create_parameter(shape=(12, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
@@ -54,7 +55,8 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
     def __init__(self, bert, config: DotMap):
         super(DataFountain529SentaBertClsSeqMeanMaxModel, self).__init__()
         self.bert = bert
-        self.dropout = paddle.nn.Dropout(config.hidden_dropout_prob)
+        self.m_conf = config.model_config[config.model_name]
+        self.dropout = paddle.nn.Dropout(self.m_conf.hidden_dropout_prob)
         self.classifier = paddle.nn.layer.Linear(768, config.num_classes)
         self.layer_weights = self.create_parameter(shape=(3, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
