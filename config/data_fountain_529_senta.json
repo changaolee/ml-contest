@@ -10,7 +10,8 @@
       "max_seq_len": 200
     },
     "bert_base": {
-      "max_seq_len": 200
+      "max_seq_len": 200,
+      "hidden_dropout_prob": 0.3
     },
     "bert_hidden_fusion": {
       "max_seq_len": 200,
@@ -19,7 +20,7 @@
   },
 
   "train": {
-    "model_name": "bert_hidden_fusion",
+    "model_name": "bert_base",
     "batch_size": 128,
     "epochs": 5,
     "learning_rate": 1e-5,

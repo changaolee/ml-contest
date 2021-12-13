@@ -4,8 +4,11 @@ import paddle
 
 
 def get_model_and_tokenizer(model_name: str, config: DotMap):
+    config = DotMap({**config.toDict(), **config[model_name].toDict()})
     if model_name in ["bert_base", "bert_baseline"]:
-        model = BertForSequenceClassification.from_pretrained("bert-base-chinese", num_classes=config.num_classes)
+        model = BertForSequenceClassification.from_pretrained("bert-base-chinese",
+                                                              num_classes=config.num_classes,
+                                                              dropout=config.hidden_dropout_prob)
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     elif model_name == "bert_hidden_fusion":
         model = DataFountain529SentaBertHiddenFusionModel.from_pretrained("bert-base-chinese", config=config)
@@ -26,8 +29,7 @@ class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):
     def __init__(self, bert, config: DotMap):
         super(DataFountain529SentaBertHiddenFusionModel, self).__init__()
         self.bert = bert
-        self.m_conf = config.model_config[config.model_name]
-        self.dropout = paddle.nn.Dropout(self.m_conf.hidden_dropout_prob)
+        self.dropout = paddle.nn.Dropout(config.hidden_dropout_prob)
         self.classifier = paddle.nn.layer.Linear(768, config.num_classes)
         self.layer_weights = self.create_parameter(shape=(12, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))
@@ -55,8 +57,7 @@ class DataFountain529SentaBertClsSeqMeanMaxModel(BertPretrainedModel):
     def __init__(self, bert, config: DotMap):
         super(DataFountain529SentaBertClsSeqMeanMaxModel, self).__init__()
         self.bert = bert
-        self.m_conf = config.model_config[config.model_name]
-        self.dropout = paddle.nn.Dropout(self.m_conf.hidden_dropout_prob)
+        self.dropout = paddle.nn.Dropout(config.hidden_dropout_prob)
         self.classifier = paddle.nn.layer.Linear(768, config.num_classes)
         self.layer_weights = self.create_parameter(shape=(3, 1, 1),
                                                    default_initializer=paddle.nn.initializer.Constant(1.0))

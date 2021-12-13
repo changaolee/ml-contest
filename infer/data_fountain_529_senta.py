@@ -21,8 +21,8 @@ class DataFountain529SentaInfer(object):
         self.model = model
         self.tokenizer = tokenizer
         self.test_ds = test_ds
-        self.m_conf = config.model_config[config.model_name]
         self.logger = config.logger
+        self.config = config
         self._gen_data_loader(config)
         self._load_model(model_params_path)
 
@@ -31,7 +31,7 @@ class DataFountain529SentaInfer(object):
         trans_func = partial(
             self.convert_example,
             tokenizer=self.tokenizer,
-            max_seq_len=self.m_conf.max_seq_len)
+            max_seq_len=config.max_seq_len)
 
         batchify_fn = lambda samples, fn=Tuple(
             Pad(axis=0, pad_val=self.tokenizer.pad_token_id),  # input_ids

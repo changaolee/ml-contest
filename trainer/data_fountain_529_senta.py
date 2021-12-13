@@ -37,8 +37,8 @@ class DataFountain529SentaTrainer(object):
         self.tokenizer = tokenizer
         self.train_ds = train_ds
         self.dev_ds = dev_ds
-        self.m_conf = config.model_config[config.model_name]
         self.logger = config.logger
+        self.config = config
         self._gen_data_loader(config)
         self._prepare(config)
 
@@ -47,7 +47,7 @@ class DataFountain529SentaTrainer(object):
         trans_func = partial(
             self.convert_example,
             tokenizer=self.tokenizer,
-            max_seq_len=self.m_conf.max_seq_len)
+            max_seq_len=config.max_seq_len)
 
         # 将数据组成批量式数据，如
         # 将不同长度的文本序列 padding 到批量式数据中最大长度
