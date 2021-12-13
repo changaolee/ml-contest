@@ -105,7 +105,7 @@ class DataFountain529SentaDataProcessor(object):
         [assessed_ds] = DataFountain529SentaDataset(self.config).load_data(splits=['assessed'], lazy=False)
 
         # 加载 model 和 tokenizer
-        model, tokenizer = get_model_and_tokenizer(self.sp_options.model_name, self.config)
+        model, tokenizer, self.config = get_model_and_tokenizer(self.sp_options.model_name, self.config)
 
         # 获取推断器
         model_params_path = self.sp_options.model_params_path

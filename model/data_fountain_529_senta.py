@@ -4,7 +4,7 @@ import paddle
 
 
 def get_model_and_tokenizer(model_name: str, config: DotMap):
-    config = DotMap({**config.toDict(), **config[model_name].toDict()})
+    config = DotMap({**config.toDict(), **config.model_config[model_name].toDict()})
     if model_name in ["bert_base", "bert_baseline"]:
         model = BertForSequenceClassification.from_pretrained("bert-base-chinese",
                                                               num_classes=config.num_classes,
@@ -18,7 +18,7 @@ def get_model_and_tokenizer(model_name: str, config: DotMap):
         tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
     else:
         raise RuntimeError("load model error: {}.".format(model_name))
-    return model, tokenizer
+    return model, tokenizer, config
 
 
 class DataFountain529SentaBertHiddenFusionModel(BertPretrainedModel):

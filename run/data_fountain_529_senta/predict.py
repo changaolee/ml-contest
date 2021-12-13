@@ -34,7 +34,7 @@ def predict():
         [test_ds] = DataFountain529SentaDataset(config).load_data(splits=['test'], lazy=False)
 
         # 加载 model 和 tokenizer
-        model, tokenizer = get_model_and_tokenizer(config.model_name, config)
+        model, tokenizer, config = get_model_and_tokenizer(config.model_name, config)
 
         # 获取推断器
         model_path = os.path.join(config.ckpt_dir, config.model_name, "fold_{}/{}/model.pdparams".format(fold, model_path))

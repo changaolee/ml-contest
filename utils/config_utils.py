@@ -37,8 +37,3 @@ def get_config(json_file: str, mode: str = ""):
     config.logger = get_logger(config.log_dir, config.exp_name)
 
     return config
-
-
-def print_config(config: DotMap):
-    del config.logger
-    print(json.dumps(config.toDict()))

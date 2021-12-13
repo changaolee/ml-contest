@@ -29,7 +29,7 @@ def train(opt):
         )
 
         # 加载 model 和 tokenizer
-        model, tokenizer = get_model_and_tokenizer(config.model_name, config)
+        model, tokenizer, config = get_model_and_tokenizer(config.model_name, config)
 
         # 获取训练器
         trainer = DataFountain529SentaTrainer(
