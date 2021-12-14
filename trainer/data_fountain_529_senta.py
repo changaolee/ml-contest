@@ -112,7 +112,7 @@ class DataFountain529SentaTrainer(object):
         if config.adversarial:
             self.enable_adversarial = True
             if config.adversarial == "fgm":
-                self.adv = FGM(self.model, emb_name='word_embeddings.')
+                self.adv = FGM(self.model, epsilon=0.5, emb_name='word_embeddings.')
             else:
                 raise RuntimeError("config error adversarial: {}".format(config.adversarial))
 

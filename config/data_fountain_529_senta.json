@@ -27,7 +27,7 @@
   "train": {
     "model_name": "bert_hidden_fusion",
     "batch_size": 128,
-    "epochs": 5,
+    "epochs": 200,
     "learning_rate": 1e-5,
     "loss_func": "focal_loss",
     "adversarial": "fgm",

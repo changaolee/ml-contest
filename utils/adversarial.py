@@ -18,7 +18,7 @@ class FGM(object):
         for name, param in self.model.named_parameters():
             if not param.stop_gradient and self.emb_name in name:  # 检验参数是否可训练及范围
                 self.backup[name] = param.numpy()  # 备份原有参数值
-                grad_tensor = paddle.to_tensor(param.grad)  # param.grad 是个 numpy对象
+                grad_tensor = paddle.to_tensor(param.grad)  # param.grad 是个 numpy 对象
                 norm = paddle.norm(grad_tensor)  # norm 化
                 if norm != 0:
                     r_at = self.epsilon * grad_tensor / norm
