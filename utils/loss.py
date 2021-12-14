@@ -7,8 +7,8 @@ class FocalLoss(paddle.nn.Layer):
         super().__init__()
         self.alpha = alpha
         self.gamma = gamma
-        self.weight = paddle.to_tensor(np.array(weight)) \
-            if weight else paddle.to_tensor(np.array([1.] * num_classes))
+        self.weight = paddle.to_tensor(np.array(weight), dtype='float32') \
+            if weight else paddle.to_tensor(np.array([1.] * num_classes), dtype='float32')
         self.ce_fn = paddle.nn.CrossEntropyLoss(
             weight=self.weight, soft_label=False, ignore_index=ignore_index)
 
