@@ -108,9 +108,6 @@ class DataFountain529SentaTrainer(object):
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
-        assert config.loss_func in ["ce_loss", "focal_loss"], \
-            "config error loss function: {}".format(config.loss_func)
-
         if config.loss_func == "ce_loss":
             # 交叉熵损失函数
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
@@ -127,6 +124,8 @@ class DataFountain529SentaTrainer(object):
             # Focal Loss (gamma = 5)
             self.criterion = FocalLoss(num_classes=config.num_classes, gamma=5)
             self.eval_criterion = FocalLoss(num_classes=config.num_classes, gamma=5)
+        else:
+            raise RuntimeError("config error loss function: {}".format(config.loss_func))
 
         # Kappa 评价指标
         self.metric = Kappa(config.num_classes)
