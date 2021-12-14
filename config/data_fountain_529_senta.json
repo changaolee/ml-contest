@@ -29,6 +29,7 @@
     "epochs": 5,
     "learning_rate": 1e-5,
     "loss_func": "focal_loss",
+    "adversarial": "fgm",
     "data_process": {
       "enable_text_clean": true,
       "data_augmentation": {
@@ -52,6 +53,7 @@
     "baseline": {
       "model_name": "bert_baseline",
       "loss_func": "ce_loss",
+      "adversarial": "",
       "data_process": {
         "enable_text_clean": false,
         "data_augmentation": {},

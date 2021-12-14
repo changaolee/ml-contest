@@ -8,6 +8,7 @@ from visualdl import LogWriter
 from utils.utils import create_data_loader, mkdir_if_not_exist
 from utils.metric import Kappa
 from utils.loss import FocalLoss
+from utils.adversarial import FGM
 import paddle.nn.functional as F
 import numpy as np
 import time
@@ -108,6 +109,13 @@ class DataFountain529SentaTrainer(object):
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
+        if config.adversarial:
+            self.enable_adversarial = True
+            if config.adversarial == "fgm":
+                self.adv = FGM(self.model)
+            else:
+                raise RuntimeError("config error adversarial: {}".format(config.adversarial))
+
         if config.loss_func == "ce_loss":
             # 交叉熵损失函数
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
@@ -152,6 +160,9 @@ class DataFountain529SentaTrainer(object):
                         # 计算损失函数值
                         loss = self.criterion(logits, labels)
 
+                        # 反向梯度回传，更新参数
+                        loss.backward()
+
                         # 预测分类概率值
                         probs = F.softmax(logits, axis=1)
                         preds = paddle.argmax(probs, axis=1, keepdim=True)
@@ -175,8 +186,13 @@ class DataFountain529SentaTrainer(object):
                         train_writer.add_scalar(tag="acc", step=global_step, value=acc)
                         train_writer.add_scalar(tag="loss", step=global_step, value=loss)
 
-                        # 反向梯度回传，更新参数
-                        loss.backward()
+                        # 对抗训练
+                        if self.enable_adversarial:
+                            self.adv.attack()  # 在 embedding 上添加对抗扰动
+                            loss_adv = self.model(input_ids, token_type_ids)
+                            loss_adv.backward()  # 反向传播，并在正常的 grad 基础上，累加对抗训练的梯度
+                            self.adv.restore()  # 恢复 embedding 参数
+
                         self.optimizer.step()
                         self.lr_scheduler.step()
                         self.optimizer.clear_grad()
