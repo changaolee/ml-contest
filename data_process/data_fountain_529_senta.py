@@ -269,7 +269,7 @@ class DataFountain529SentaDataProcessor(object):
             text = text.replace(mm, mm.replace(",", ""))
 
         # 去除数字小数点
-        p = re.compile(r"\d+.\d+")
+        p = re.compile(r"\d+\.\d+")
         for m in p.finditer(text):
             mm = m.group()
             text = text.replace(mm, mm[0:mm.find(".")])
