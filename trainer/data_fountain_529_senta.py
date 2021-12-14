@@ -120,22 +120,18 @@ class DataFountain529SentaTrainer(object):
             # 交叉熵损失函数
             self.criterion = paddle.nn.loss.CrossEntropyLoss()
             self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
-            self.adv_criterion = paddle.nn.loss.CrossEntropyLoss()
         elif config.loss_func == "focal_loss":
             # Focal Loss
             self.criterion = FocalLoss(num_classes=config.num_classes)
             self.eval_criterion = FocalLoss(num_classes=config.num_classes)
-            self.adv_criterion = FocalLoss(num_classes=config.num_classes)
         elif config.loss_func == "focal_loss-gamma3":
             # Focal Loss (gamma = 3)
             self.criterion = FocalLoss(num_classes=config.num_classes, gamma=3)
             self.eval_criterion = FocalLoss(num_classes=config.num_classes, gamma=3)
-            self.adv_criterion = FocalLoss(num_classes=config.num_classes, gamma=3)
         elif config.loss_func == "focal_loss-gamma5":
             # Focal Loss (gamma = 5)
             self.criterion = FocalLoss(num_classes=config.num_classes, gamma=5)
             self.eval_criterion = FocalLoss(num_classes=config.num_classes, gamma=5)
-            self.adv_criterion = FocalLoss(num_classes=config.num_classes, gamma=5)
         else:
             raise RuntimeError("config error loss function: {}".format(config.loss_func))
 
@@ -193,9 +189,8 @@ class DataFountain529SentaTrainer(object):
                         # 对抗训练
                         if self.enable_adversarial:
                             self.adv.attack()  # 在 embedding 上添加对抗扰动
-                            adv_logits = self.model(input_ids, token_type_ids)
-                            adv_loss = self.adv_criterion(adv_logits, labels)
-                            adv_loss.backward()  # 反向传播，并在正常的 grad 基础上，累加对抗训练的梯度
+                            loss_adv = self.model(input_ids, token_type_ids)
+                            loss_adv.backward()  # 反向传播，并在正常的 grad 基础上，累加对抗训练的梯度
                             self.adv.restore()  # 恢复 embedding 参数
 
                         self.optimizer.step()
