@@ -117,9 +117,16 @@ class DataFountain529SentaTrainer(object):
             self.eval_criterion = paddle.nn.loss.CrossEntropyLoss()
         elif config.loss_func == "focal_loss":
             # Focal Loss
-            weight = None  # 默认值效果会更好
-            self.criterion = FocalLoss(num_classes=config.num_classes, weight=weight)
-            self.eval_criterion = FocalLoss(num_classes=config.num_classes, weight=weight)
+            self.criterion = FocalLoss(num_classes=config.num_classes)
+            self.eval_criterion = FocalLoss(num_classes=config.num_classes)
+        elif config.loss_func == "focal_loss-gamma3":
+            # Focal Loss (gamma = 3)
+            self.criterion = FocalLoss(num_classes=config.num_classes, gamma=3)
+            self.eval_criterion = FocalLoss(num_classes=config.num_classes, gamma=3)
+        elif config.loss_func == "focal_loss-gamma5":
+            # Focal Loss (gamma = 5)
+            self.criterion = FocalLoss(num_classes=config.num_classes, gamma=5)
+            self.eval_criterion = FocalLoss(num_classes=config.num_classes, gamma=5)
 
         # Kappa 评价指标
         self.metric = Kappa(config.num_classes)

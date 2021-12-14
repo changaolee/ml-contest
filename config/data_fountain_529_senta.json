@@ -28,7 +28,7 @@
     "batch_size": 128,
     "epochs": 5,
     "learning_rate": 1e-5,
-    "loss_func": "focal_loss",
+    "loss_func": "focal_loss-gamma3",
     "data_process": {
       "enable_text_clean": true,
       "data_augmentation": {
