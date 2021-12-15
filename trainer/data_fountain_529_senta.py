@@ -109,6 +109,7 @@ class DataFountain529SentaTrainer(object):
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
+        self.enable_adversarial = False
         if config.adversarial:
             self.enable_adversarial = True
             if config.adversarial == "fgm":
