@@ -1,16 +1,15 @@
 ### 运行
 
-1. 初始化环境变量
+```bash
+// 初始化环境变量
+$ source env-gpu.sh
 
-> source env-gpu.sh
+// 开始训练
+$ python3 run/{exp_name}/train.py
 
-2. 开始训练
-
-> python3 run/{exp_name}/train.py
-
-3. 执行预测
-
-> python3 run/{exp_name}/predict.py
+// 执行预测
+$ python3 run/{exp_name}/predict.py
+```
 
 ### 目录结构
 
