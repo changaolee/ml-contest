@@ -67,6 +67,7 @@
 
   "predict": {
     "batch_size": 8,
+    "model_base_path": "/home/aistudio/work/checkpoints",
     "model_params": {
         "bert_base": 0.69339421919,
         "bert_hidden_fusion": 0.69966576165,
@@ -74,6 +75,7 @@
     },
     "data_process": {
       "enable_text_clean": true
-    }
+    },
+    "k_fold": 10
   }
 }

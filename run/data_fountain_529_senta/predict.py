@@ -16,17 +16,14 @@ def predict():
     data_processor = DataFountain529SentaDataProcessor(config)
     data_processor.process()
 
-    # 模型文件存储根路径
-    base_path = '/home/aistudio/work/checkpoints'
-
     # 使用配置中的所有模型进行融合
     fusion_result = []
     for model_name, weight in config.model_params.items():
 
         # 计算单模型 K 折交叉验证的结果
         k_fold_result = []
-        for fold in range(10):
-            model_path = os.path.join(base_path, model_name, 'model_{}.pdparams'.format(fold))
+        for fold in range(config.k_fold):
+            model_path = os.path.join(config.base_path, model_name, 'model_{}.pdparams'.format(fold))
             fold_result = single_model_predict(config, model_name, model_path)
             k_fold_result.append(fold_result)
 
@@ -40,7 +37,7 @@ def predict():
     result = merge_fusion_result(fusion_result)
 
     # 写入预测结果
-    with open(os.path.join(base_path, "result.csv"), "w", encoding="utf-8") as f:
+    with open(os.path.join(config.base_path, "result.csv"), "w", encoding="utf-8") as f:
         writer = csv.writer(f)
         writer.writerow(["id", "class"])
         for line in result:
