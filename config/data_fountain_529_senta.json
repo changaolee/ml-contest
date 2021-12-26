@@ -67,7 +67,13 @@
 
   "predict": {
     "batch_size": 8,
-    "models": [],
-    "strategy": ""
+    "model_params": {
+        "bert_base": 0.69339421919,
+        "bert_hidden_fusion": 0.69966576165,
+        "bert_cls_seq_mean_max": 0.69421932573
+    },
+    "data_process": {
+      "enable_text_clean": true
+    }
   }
 }
