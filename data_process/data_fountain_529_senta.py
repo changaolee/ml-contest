@@ -39,6 +39,7 @@ class DataFountain529SentaDataProcessor(object):
         self.random_state = config.random_state
         self.dev_prop = config.dev_prop
 
+        self.mode = config.mode
         self.logger = config.logger
 
     def _set_processed_data_path(self, config):
@@ -87,7 +88,8 @@ class DataFountain529SentaDataProcessor(object):
             self._data_augmentation()
 
         # 训练集、开发集划分
-        self._train_dev_dataset_split()
+        if self.mode != "predict":
+            self._train_dev_dataset_split()
 
         # 测试集保存
         self._test_dataset_save()

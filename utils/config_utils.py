@@ -21,6 +21,7 @@ def get_config(json_file: str, mode: str = ""):
         config_dict = json.load(config_file)
 
     config = DotMap(config_dict)
+    config.mode = mode
     if mode:
         config = DotMap({**config.toDict(), **config[mode].toDict()})
 
