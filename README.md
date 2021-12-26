@@ -1,3 +1,9 @@
+### 已完成比赛
+
+| 完成日期 | 赛题 | 方案详情 |
+| --- | --- | --- |
+| 2021-11-23 | [产品评论观点提取](https://www.datafountain.cn/competitions/529) | [情感分析](./notebook/data_fountain_529_senta)、[命名实体识别](./notebook/data_fountain_529_ner) |
+
 ### 运行
 
 ```bash
