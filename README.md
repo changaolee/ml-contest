@@ -16,72 +16,92 @@
 
 ```
 .
+├── config                                              // 配置目录
+│   ├── data_fountain_529_ner.json                      // DataFountain 529 NER 任务
+│   └── data_fountain_529_senta.json                    // DataFountain 529 SENTA 任务
+├── data                                                // 数据目录
+│   ├── data_fountain_529_ner
+│   │   └── README.md
+│   └── data_fountain_529_senta
+│       ├── data_augmentation                           // 数据增强目录
+│       │   └── 929e3b6b06b3df8ce5bfce403e48c820        // 基于配置参数生成的唯一 key
+│       │       ├── test.csv                            // 增强后的测试数据
+│       │       └── train.csv                           // 增强后的训练
+│       ├── data_difficulty_assessment                  // 数据难度评估目录
+│       │   ├── 929e3b6b06b3df8ce5bfce403e48c820
+│       │   │   ├── assessed_data.csv                   // 难度评估后数据标签（原始标签+难度标签）
+│       │   └── └── data_difficulty_score.json          // 原始数据难度打分
+│       ├── processed                                   // 处理后数据（直接输入模型）
+│       │   └── 929e3b6b06b3df8ce5bfce403e48c820
+│       │       ├── dev_0.csv                           // 开发集 K 折划分
+│       │       ├── dev_1.csv                           // ...
+│       │       ├── dev_2.csv                           // ...
+│       │       ├── test.csv                            // 测试集
+│       │       ├── train_0.csv                         // 训练集 K 折划分
+│       │       ├── train_1.csv                         // ...
+│       │       └── train_2.csv                         // ...
+│       ├── README.md
+│       ├── submit_example.csv                          // 赛题原始数据文件
+│       ├── test_public.csv                             // ...
+│       └── train_data_public.csv                       // ...
+├── data_process                                        // 数据处理
+│   ├── data_fountain_529_ner.py
+│   ├── data_fountain_529_senta.py
+│   └── __init__.py
+├── dataset                                             // 模型数据集构建
+│   ├── data_fountain_529_ner.py
+│   ├── data_fountain_529_senta.py
+│   └── __init__.py
+├── env-gpu.sh                                          // 环境初始化脚本（GPU）
+├── env.sh                                              // 环境初始化脚本（CPU）
+├── experiment                                          // 运行中数据存储目录
+│   └── data_fountain_529_senta
+│       ├── checkpoint                                  // 模型 checkpoint 参数
+│       ├── log                                         // 运行日志
+│       │   └── data_fountain_529_senta.log
+│       ├── result                                      // 预测结果
+│       └── visual_log                                  // 训练可视化
+├── infer                                               // 推断器
+│   ├── data_fountain_529_ner.py
+│   ├── data_fountain_529_senta.py
+│   └── __init__.py
+├── model                                               // 模型
+│   ├── data_fountain_529_ner.py
+│   ├── data_fountain_529_senta.py
+│   └── __init__.py
+├── notebook                                            // notebook（数据探查等）
+│   └── data_fountain_529_senta
+│       └── 情感分类：数据探索.ipynb
 ├── README.md
-├── base
-│   ├── __init__.py
-│   ├── data_loader_base.py
-│   ├── infer_base.py
-│   ├── model_base.py
-│   └── trainer_base.py
-├── config
-│   └── data_fountain_529.json
-├── data
-│   └── data_fountain_529
-├── datasets
-│   ├── __init__.py
-│   └── data_fountain_529.py
-├── doc
-├── experiments
-│   └── data_fountain_529
-├── infer
+├── requirements-gpu.txt                                // 项目依赖（GPU）
+├── requirements.txt                                    // 项目依赖（CPU）
+├── resource                                            // 一些其他资源文件
+│   ├── font
+│   │   └── SimHei.ttf
+│   └── stopwords
+│       ├── baidu_stopwords.txt
+│       ├── cn_stopwords.txt
+│       ├── hit_stopwords.txt
+│       └── scu_stopwords.txt
+├── run                                                 // 执行入口（脚本）
+│   └── data_fountain_529_senta
+│       ├── predict.py                                  // 结果预测
+│       ├── scripts                                     // 一些定制化脚本
+│       │   └── gen_entity.py
+│       └── train.py                                    // 模型训练
+├── trainer                                             // 训练器
+│   ├── data_fountain_529_ner.py
+│   ├── data_fountain_529_senta.py
 │   └── __init__.py
-├── model
-│   └── __init__.py
-├── run
-│   ├── test.py
-│   └── train.py
-├── test
-│   └── test.py
-├── trainer
-│   └── __init__.py
-└── utils
+└── utils                                               // 一些公共方法
+    ├── adversarial.py                                  // 对抗训练（FGM）
+    ├── config_utils.py                                 // 配置相关
     ├── __init__.py
-    ├── config_utils.py
-    └── utils.py
-```
-
-### 配置信息
-#### data fountain 529
-
-- 进一步优化
-    - 伪标签
-    - 对抗训练
-    - 继续 pretrain 再 fine tune
-    - 尝试其他预训练模型
-
-```
-// 情感分类任务：config/data_fountain_529_senta.json
-{
-  "exp_name": "data_fountain_529_senta",  // 任务名称
-  "model_name": "bert_baseline",  // 模型名称
-  
-  "train_filename": "train_data_public.csv",  // 原始训练集文件名
-  "test_filename": "test_public.csv",  // 原始测试集文件名
-  "k_fold": 5,  // 交叉验证折数
-  
-  /**
-   * 模型参数配置
-   */
-  "max_seq_len": 256,
-  "hidden_dropout_prob": 0.1,
-  "hidden_size": 768,
-  "num_classes": 3,
-  
-   /**
-   * 训练参数配置
-   */
-  "batch_size": 64,
-  "train_epochs":3,
-  "learning_rate": 2e-5
-}
+    ├── loss.py                                         // 自定义损失函数
+    ├── metric.py                                       // 自定义评价指标
+    ├── nlp_da.py                                       // NLP 数据增强方法
+    ├── sdk                                             // 第三方 SDK
+    │   ├── baidu_translate.py                          // 百度翻译
+    │   └── __init__.py
+    └── utils.py                                        // 一些工具方法
 ```
