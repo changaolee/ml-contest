@@ -9,6 +9,12 @@
     },
     "bert_crf": {
       "max_seq_len": 200
+    },
+    "ernie_base": {
+      "max_seq_len": 200
+    },
+    "ernie_crf": {
+      "max_seq_len": 200
     }
   },
 
@@ -29,7 +35,9 @@
     "base_path": "/home/aistudio/work/checkpoints",
     "model_params": {
         "bert_base": 1.0,
-        "bert_crf": 1.0
+        "bert_crf": 1.0,
+        "ernie_base": 1.0,
+        "ernie_crf": 1.0
     },
     "k_fold": 10
   }
