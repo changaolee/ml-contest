@@ -1,18 +1,36 @@
 {
   "exp_name": "data_fountain_529_ner",
-  "model_name": "bert_crf",
-
   "train_filename": "train_data_public.csv",
   "test_filename": "test_public.csv",
 
-  "k_fold": 10,
-  "random_state": 2021,
-  "dev_prop": 0.2,
+  "model_config": {
+    "bert_base": {
+      "max_seq_len": 200
+    },
+    "bert_crf": {
+      "max_seq_len": 200
+    }
+  },
 
-  "max_seq_len": 200,
+  "train": {
+    "model_name": "bert_crf",
+    "loss_func": "ce_loss",
+    "batch_size": 64,
+    "epochs": 10,
+    "learning_rate": 2e-5,
+    "adam_epsilon": 1e-8,
+    "k_fold": 10,
+    "random_state": 2021,
+    "dev_prop": 0.2
+  },
 
-  "batch_size": 64,
-  "train_epochs": 6,
-  "learning_rate": 2e-5,
-  "adam_epsilon": 1e-8
+  "predict": {
+    "batch_size": 8,
+    "base_path": "/home/aistudio/work/checkpoints",
+    "model_params": {
+        "bert_base": 1.0,
+        "bert_crf": 1.0
+    },
+    "k_fold": 10
+  }
 }

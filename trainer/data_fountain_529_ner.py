@@ -31,24 +31,26 @@ class DataFountain529NerTrainer(object):
                  train_ds: MapDataset,
                  dev_ds: MapDataset,
                  config: DotMap):
+        if config.model_name not in config.model_config:
+            raise RuntimeError("current model: {} not configured".format(config.model_name))
         self.model = model
         self.tokenizer = tokenizer
         self.train_ds = train_ds
         self.dev_ds = dev_ds
+        self.logger = config.logger
         self.config = config
-        self.logger = self.config.logger
-        self._gen_data_loader()
-        self._prepare()
+        self._gen_data_loader(config)
+        self._prepare(config)
 
-    def _gen_data_loader(self):
-        label_vocab = load_label_vocab(self.config.label_list)
+    def _gen_data_loader(self, config):
+        label_vocab = load_label_vocab(config.label_list)
         self.no_entity_id = label_vocab["O"]
 
         # 将数据处理成模型可读入的数据格式
         trans_func = partial(
             self.convert_example,
             tokenizer=self.tokenizer,
-            max_seq_len=self.config.max_seq_len,
+            max_seq_len=config.max_seq_len,
             label_vocab=label_vocab)
 
         batchify_fn = lambda samples, fn=Tuple(
@@ -62,34 +64,30 @@ class DataFountain529NerTrainer(object):
             self.train_ds,
             trans_fn=trans_func,
             mode='train',
-            batch_size=self.config.batch_size,
+            batch_size=config.batch_size,
             batchify_fn=batchify_fn)
         self.dev_data_loader = create_data_loader(
             self.dev_ds,
             trans_fn=trans_func,
             mode='dev',
-            batch_size=self.config.batch_size,
+            batch_size=config.batch_size,
             batchify_fn=batchify_fn)
 
-    def _prepare(self):
+    def _prepare(self, config):
         # 当前训练折次
-        self.fold = self.config.fold
+        self.fold = config.fold
         # 训练折数
-        self.total_fold = self.config.k_fold
+        self.total_fold = config.k_fold or 1
         # 训练轮次
-        self.epochs = self.config.train_epochs
+        self.epochs = config.epochs
 
         # 训练过程中保存模型参数的文件夹
-        self.ckpt_dir = os.path.join(self.config.ckpt_dir, self.config.model_name, "fold_{}".format(self.fold))
+        self.ckpt_dir = os.path.join(config.ckpt_dir, config.model_name, "fold_{}".format(self.fold))
         mkdir_if_not_exist(self.ckpt_dir)
 
         # 可视化日志的文件夹
-        self.train_vis_dir = os.path.join(
-            self.config.vis_dir, self.config.model_name, "fold_{}/train".format(self.fold)
-        )
-        self.dev_vis_dir = os.path.join(
-            self.config.vis_dir, self.config.model_name, "fold_{}/dev".format(self.fold)
-        )
+        self.train_vis_dir = os.path.join(config.vis_dir, config.model_name, "fold_{}/train".format(self.fold))
+        self.dev_vis_dir = os.path.join(config.vis_dir, config.model_name, "fold_{}/dev".format(self.fold))
         mkdir_if_not_exist(self.train_vis_dir)
         mkdir_if_not_exist(self.dev_vis_dir)
 
@@ -97,7 +95,7 @@ class DataFountain529NerTrainer(object):
         self.num_training_steps = len(self.train_data_loader) * self.epochs
 
         # 定义 learning_rate_scheduler，负责在训练过程中对 lr 进行调度
-        self.lr_scheduler = LinearDecayWithWarmup(self.config.learning_rate, self.num_training_steps, 0.0)
+        self.lr_scheduler = LinearDecayWithWarmup(config.learning_rate, self.num_training_steps, 0.0)
 
         # Generate parameter names needed to perform weight decay.
         # All bias and LayerNorm parameters are excluded.
@@ -108,22 +106,25 @@ class DataFountain529NerTrainer(object):
         # 定义 Optimizer
         self.optimizer = paddle.optimizer.AdamW(
             learning_rate=self.lr_scheduler,
-            epsilon=self.config.adam_epsilon,
+            epsilon=config.adam_epsilon,
             parameters=self.model.parameters(),
             weight_decay=0.0,
             apply_decay_param_fun=lambda x: x in decay_params)
 
-        # 交叉熵损失函数
-        self.criterion = nn.loss.CrossEntropyLoss(ignore_index=self.ignore_label)
-        self.eval_criterion = nn.loss.CrossEntropyLoss(ignore_index=self.ignore_label)
-
-        # # Focal Loss
-        # self.criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.ignore_label)
-        # self.eval_criterion = FocalLoss(num_classes=len(self.config.label_list), ignore_index=self.ignore_label)
+        if config.loss_func == "ce_loss":
+            # 交叉熵损失函数
+            self.criterion = nn.loss.CrossEntropyLoss(ignore_index=self.ignore_label)
+            self.eval_criterion = nn.loss.CrossEntropyLoss(ignore_index=self.ignore_label)
+        elif config.loss_func == "focal_loss":
+            # Focal Loss
+            self.criterion = FocalLoss(num_classes=len(config.label_list), ignore_index=self.ignore_label)
+            self.eval_criterion = FocalLoss(num_classes=len(config.label_list), ignore_index=self.ignore_label)
+        else:
+            raise RuntimeError("config error loss function: {}".format(config.loss_func))
 
         # 评价指标
-        self.metric = ChunkEvaluator(label_list=self.config.label_list)
-        self.eval_metric = ChunkEvaluator(label_list=self.config.label_list)
+        self.metric = ChunkEvaluator(label_list=config.label_list)
+        self.eval_metric = ChunkEvaluator(label_list=config.label_list)
 
     def train(self):
         # 开启训练
@@ -133,7 +134,7 @@ class DataFountain529NerTrainer(object):
         with LogWriter(logdir=self.train_vis_dir) as train_writer:
             with LogWriter(logdir=self.dev_vis_dir) as dev_writer:
                 for epoch in range(1, self.epochs + 1):
-                    for step, batch in enumerate(self.train_data_loader):
+                    for step, batch in enumerate(self.train_data_loader, start=1):
                         input_ids, token_type_ids, lens, labels = batch
 
                         if self.config.model_name in ["bert_crf", "ernie_crf"]:
@@ -164,8 +165,7 @@ class DataFountain529NerTrainer(object):
                             if global_step % 10 == 0:
                                 self.logger.info(
                                     "「%d/%d」global step %d, epoch: %d, batch: %d, loss: %.5f, precision: %.5f, recall: %.5f, f1: %.5f, speed: %.2f step/s"
-                                    % (self.fold, self.total_fold, global_step, epoch, step,
-                                       loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
+                                    % (self.fold, self.total_fold, global_step, epoch, step, loss, precision, recall, f1_score, 10 / (time.time() - tic_train)))
                                 tic_train = time.time()
 
                                 train_writer.add_scalar(tag="precision", step=global_step, value=precision)
@@ -190,11 +190,11 @@ class DataFountain529NerTrainer(object):
                             if self.config.model_name not in ["bert_crf", "ernie_crf"]:
                                 dev_writer.add_scalar(tag="loss", step=global_step, value=loss_dev)
 
-                            # 保存当前模型参数等
-                            if global_step >= 400:
-                                save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
-                                mkdir_if_not_exist(save_dir)
-                                paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
+                            # # 保存当前模型参数等
+                            # if global_step >= 400:
+                            #     save_dir = os.path.join(self.ckpt_dir, "model_%d" % global_step)
+                            #     mkdir_if_not_exist(save_dir)
+                            #     paddle.save(self.model.state_dict(), os.path.join(save_dir, "model.pdparams"))
 
     @staticmethod
     def convert_example(example, tokenizer, max_seq_len, label_vocab):

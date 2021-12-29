@@ -12,7 +12,7 @@ class DataFountain529NerDataset(object):
         super().__init__()
         self.config = config
 
-    def load_data(self, fold=1, splits=None, lazy=None):
+    def load_data(self, fold=0, splits=None, lazy=None):
         result = []
         for split in splits:
             path = self.config.splits.get(split).format(fold)
