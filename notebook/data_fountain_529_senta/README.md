@@ -85,11 +85,13 @@ Focal Loss 可以认为是交叉熵损失的延伸，它的原理是使容易分
 
 模型对比结果如下表：
 
+<div align=center>
 | 模型 | 分数 |
 | --- | :---: |
 | BERT-base | 0.652 |
 | BERT-hidden-fusion | **0.669** |
 | BERT-CLS-mean-max | **0.660** |
+</div>
 
 可以看到，我们针对 BERT 改进的两种模型，最终得分都在一定程度上有所提升。
 
