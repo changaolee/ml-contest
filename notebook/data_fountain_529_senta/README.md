@@ -86,11 +86,13 @@ Focal Loss 可以认为是交叉熵损失的延伸，它的原理是使容易分
 模型对比结果如下表：
 
 <div align=center>
+
 | 模型 | 分数 |
 | --- | :---: |
 | BERT-base | 0.652 |
 | BERT-hidden-fusion | **0.669** |
 | BERT-CLS-mean-max | **0.660** |
+
 </div>
 
 可以看到，我们针对 BERT 改进的两种模型，最终得分都在一定程度上有所提升。
@@ -99,10 +101,14 @@ Focal Loss 可以认为是交叉熵损失的延伸，它的原理是使容易分
 
 这里我们选择 FGM 进行对抗训练。对已有的三个模型增加对抗训练后的对比结果如下表：
 
+<center>
+
 | 模型 | 分数 |
 | --- | :---: |
 | BERT-base + FGM | 0.656 |
 | BERT-hidden-fusion + FGM | **0.686** |
 | BERT-CLS-mean-max + FGM | **0.670** |
+
+</center>
 
 可以看到，对抗训练是有效的，在原有的分数基础上都提升了至少一个百分点，尤其对于 BERT-hidden-fusion 提升了接近两个百分点。
