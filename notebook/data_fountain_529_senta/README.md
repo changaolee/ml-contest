@@ -1,3 +1,10 @@
+<style>
+    table {
+        margin: auto;
+        border: 1px solid red
+    }
+</style>
+
 ## 产品评论观点提取
 ### 比赛地址
 
@@ -13,19 +20,19 @@
 
 下图是使用基线模型进行 10 折交叉验证的训练结果，可以看到基于训练难度对数据集划分能够在很大程度上提升模型的稳定性，从而更好地进行之后的模型融合。
 
-<img src="./resources/difficulty.png" height="200"/>
+<div align=center><img src="./resources/difficulty.png" height="300"/></div>
 
 #### 2. 数据增强 & 数据清洗
 
 首先考虑一些通用的文本增强手段，如下：
 
 1. 随机同义/近义词替换：不考虑停用词，在句子中随机抽取n个词，然后从同义/近义词词典中随机抽取同义/近义词，并进行替换；
-2. 随机字删除：句子中的每个词，以概率p随机删除，数字、时间不会删除；
+2. 随机字删除：句子中的每个词，以概率 p 随机删除，数字、时间不会删除；
 3. 随机邻近字置换：一定范围内将原句子乱序；
-4. 等价字替换：如句子中1、一、壹、①之间的相互替换；
+4. 等价字替换：如句子中 1、一、壹、① 之间的相互替换；
 5. 回译：借助百度垂直领域翻译的 API，对原始文本进行中->英->中的翻译。
 
-另外，由于本赛题包括两个任务，NER 任务提供了命名实体的标注结果，因此，为了引入更多的信息，我们设计了一个NER 实体随机替换的数据增强方式，具体方法如下：
+另外，由于本赛题包括两个任务，NER 任务提供了命名实体的标注结果，因此，为了引入更多的信息，我们设计了一个 NER 实体随机替换的数据增强方式，具体方法如下：
 
 已有的标注标签包括“银行”、“产品”、“评论-名词” 和 “评论-形容词”，考虑到情感分类任务的特点，我们选择对 “银行” 和 “产品” 两种实体进行提取，之后对每条数据的这两种实体以一定概率随机替换，从而得到增强后的样本。
 
@@ -59,7 +66,7 @@
 
 分别使用 Kappa 系数和 Acc 作为评估指标的训练曲线如下所示。
 
-<img src="./resources/kappa_acc.png" height="200"/>
+<div align=center><img src="./resources/kappa_acc.png" height="300"/></div>
 
 可以看到，Acc 整体变化远不如 Kappa 系数更加明显，因此选择 Kappa 系数作为评估指标更加合理，可以帮助我们更准确的选择最佳模型。
 
@@ -69,7 +76,7 @@ Focal Loss 可以认为是交叉熵损失的延伸，它的原理是使容易分
 
 下图是同一模型下使用交叉熵损失函数和 Focal Loss 损失函数进行训练的迭代曲线，可以看到虽然 Focal Loss 对于模型准确率提升并不是很大，但是能够很好地提升训练的稳定性。
 
-<img src="./resources/ce_focal.png" height="200"/>
+<div align=center><img src="./resources/ce_focal.png" height="300"/></div>
 
 #### 5. 模型结构
 
@@ -77,11 +84,11 @@ Focal Loss 可以认为是交叉熵损失的延伸，它的原理是使容易分
 
 第一种改进结构我们称之为 BERT-hidden-fusion，其原理就是将隐藏层表示进行动态融合。具体做法为首先提取 BERT 的 12 层 Transformer 输出的 CLS 向量，之后为它们赋予一个初始权重，而后通过训练来确定权重值，并将每一层生成的表示加权平均，得到最终的文本向量表示。具体模型结构如下：
 
-<img src="./resources/BERT-hidden-fusion.png" height="300"/>
+<div align=center><img src="./resources/BERT-hidden-fusion.png" height="400"/></div>
 
 第二种改进结构我们称之为 BERT-CLS-mean-max，其原理就是为了充分利用最后一层的输出结果，将 CLS 向量与 Seq 的均值和最大值进行动态融合。具体模型结构如下：
 
-<img src="./resources/BERT-CLS-mean-max.png" height="300"/>
+<div align=center><img src="./resources/BERT-CLS-mean-max.png" height="400"/></div>
 
 模型对比结果如下表：
 
