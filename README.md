@@ -9,6 +9,9 @@
 ### 运行
 
 ```bash
+// 在 data 目录下载对应赛题数据
+$ cp ~/{data_path}/* ./data/{exp_name}
+
 // 初始化环境变量
 $ source env-gpu.sh
 
