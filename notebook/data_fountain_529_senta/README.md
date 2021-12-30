@@ -81,11 +81,11 @@ Focal Loss 可以认为是交叉熵损失的延伸，它的原理是使容易分
 
 第一种改进结构我们称之为 BERT-hidden-fusion，其原理就是将隐藏层表示进行动态融合。具体做法为首先提取 BERT 的 12 层 Transformer 输出的 CLS 向量，之后为它们赋予一个初始权重，而后通过训练来确定权重值，并将每一层生成的表示加权平均，得到最终的文本向量表示。具体模型结构如下：
 
-<div align=center><img src="./resources/BERT-hidden-fusion.png" height="400"/></div><br/>
+<div align=center><img src="./resources/BERT-hidden-fusion.png" height="300"/></div><br/>
 
 第二种改进结构我们称之为 BERT-CLS-mean-max，其原理就是为了充分利用最后一层的输出结果，将 CLS 向量与 Seq 的均值和最大值进行动态融合。具体模型结构如下：
 
-<div align=center><img src="./resources/BERT-CLS-mean-max.png" height="400"/></div><br/>
+<div align=center><img src="./resources/BERT-CLS-mean-max.png" height="300"/></div><br/>
 
 模型对比结果如下表：
 
