@@ -2,9 +2,9 @@
 
 ### 已完成比赛
 
-| 完成日期 | 赛题 | 方案详情 |
-| --- | --- | --- |
-| 2021-11-23 | [产品评论观点提取](https://www.datafountain.cn/competitions/529) | [情感分类](./notebook/data_fountain_529_senta)、[命名实体识别](./notebook/data_fountain_529_ner) |
+| 完成日期 | 赛题 | 方案详情 | AI Studio |
+| --- | --- | --- | :---: |
+| 2021-11-23 | [产品评论观点提取](https://www.datafountain.cn/competitions/529) | [情感分类](./notebook/data_fountain_529_senta)、[命名实体识别](./notebook/data_fountain_529_ner)| [查看](https://aistudio.baidu.com/aistudio/projectdetail/3371052)  |
 
 ### 运行
 
