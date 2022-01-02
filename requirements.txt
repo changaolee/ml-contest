@@ -48,7 +48,7 @@ paddlefsl==1.0.0
 paddlenlp==2.1.1
 paddlepaddle==2.2.0
 pandas==1.3.3
-Pillow==8.2.0
+Pillow==8.3.2
 platformdirs==2.4.0
 pre-commit==2.15.0
 protobuf==3.18.1
