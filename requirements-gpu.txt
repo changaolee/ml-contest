@@ -118,7 +118,7 @@ packaging==20.9
 paddlefsl==1.0.0
 paddlehub==2.0.4
 paddlenlp==2.1.1
-paddlepaddle-gpu==2.2.1
+paddlepaddle-gpu==2.2.1.post101
 pamela==1.0.0
 pandas==1.1.5
 pandocfilters==1.4.2
