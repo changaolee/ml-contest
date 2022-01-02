@@ -22,7 +22,7 @@ def predict():
 
         # 计算单模型 K 折交叉验证的结果
         k_fold_result = []
-        for fold in range(config.k_fold):
+        for fold in range(config.k_fold or 1):
             model_path = os.path.join(config.base_path, model_name, 'model_{}.pdparams'.format(fold))
             fold_result = single_model_predict(config, model_name, model_path)
             k_fold_result.append(fold_result)
