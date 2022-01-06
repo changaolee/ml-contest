@@ -53,7 +53,7 @@ def predict():
 
 def merge_fusion_result(fusion_result):
     # TODO: 尝试不同的模型融合方法
-    return fusion_result[0]
+    return fusion_result[0][0]
 
 
 def single_model_predict(config: DotMap, model_name: str, model_path: str):
